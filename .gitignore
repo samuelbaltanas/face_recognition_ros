@@ -1,3 +1,11 @@
+# FACE_RECOGNITION_ROS
+
+data/database/*
+data/datasets/*
+data/models/*
+
+# DEFAULT ROS
+
 devel/
 logs/
 build/
