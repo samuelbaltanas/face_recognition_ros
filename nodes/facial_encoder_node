@@ -1,0 +1,52 @@
+#!/usr/bin/env python2
+
+import cv2 as cv
+
+import tensorflow as tf
+import rospy as ros
+
+import geometry_msgs.msg as geometry_msgs
+import sensor_msgs.msg as sensor_msgs
+import cv_bridge
+
+from facial_recognition import face_encoding
+
+NODE_NAME = 'face_recognition'
+MODEL = '20180402-114759'
+
+class FacialEncoderNode():
+
+    def __init__(self, sess):
+        self.face_det = face_encoding.FacialEncoder(sess, MODEL)
+        ros.loginfo('[{}] Facial encoder loaded.'.format(NODE_NAME))
+
+        self.bridge = cv_bridge.CvBridge()
+        self.img_sub = ros.Subscriber('/camera', sensor_msgs.Image, self.imageCallback)
+
+    def imageCallback(self, msg):
+        ros.loginfo('[{}] Image received.'.format(NODE_NAME))
+
+        try:
+            cv_image = self.bridge.imgmsg_to_cv2(msg, "rgb8")
+        except cv_bridge.CvBridgeError as e:
+            ros.logerr('[{}] Error: {}'.format(NODE_NAME, e))
+
+        #im = self.face_det.load_images(cv_image)
+        emb = self.face_det.predict([cv_image])
+
+        ros.loginfo('[{}] Image embeding {}.'.format(NODE_NAME, emb))
+
+
+def main():
+    with tf.Graph().as_default():
+        with tf.Session() as sess:
+            ros.init_node(NODE_NAME)
+            node = FacialEncoderNode(sess)
+
+            try:
+                ros.spin()
+            except KeyboardInterrupt:
+                ros.logerr('[{}] KeyboardInterrupt. Shutting down. '.format(NODE_NAME))
+
+if __name__ == "__main__":
+    main()
