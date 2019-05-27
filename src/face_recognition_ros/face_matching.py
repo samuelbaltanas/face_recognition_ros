@@ -6,7 +6,7 @@ import bisect
 
 import numpy as np
 
-from facial_recognition import face_encoding
+from face_recognition_ros import face_encoding
 from utils import files
 
 

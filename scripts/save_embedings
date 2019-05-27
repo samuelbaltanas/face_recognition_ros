@@ -9,7 +9,7 @@ import argparse
 import tensorflow as tf
 
 from utils import files
-from facial_recognition import face_encoding, face_matching
+from face_recognition_ros import face_encoding, face_matching
 
 sample_people = [
     'George_W_Bush',

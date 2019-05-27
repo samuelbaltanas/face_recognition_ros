@@ -11,9 +11,8 @@ setup_args = generate_distutils_setup(
     scripts=['scripts/compare_faces_demo', 'scripts/save_embedings'],
     packages=['face_recognition_ros', 'utils', 'facenet'],
     package_dir={
-        '': 'src'#,
-        #'facenet': 'facenet/src/facenet'
-    }
+        '': 'src'
+    },
 )
 
 setup(**setup_args)

@@ -1,11 +1,11 @@
 #!/usr/bin/env python2
 
-#import rospy
+# import rospy
 import numpy as np 
 
 import tensorflow as tf
 
-from facial_recognition import face_encoding
+from face_recognition_ros import face_encoding
 from utils import embedings, files
 
 

@@ -17,7 +17,7 @@ def main():
     image = cv.imread(files.get_flw_sample_path(0)[0], 1)
 
     try:
-        img_mss = bridge.cv2_to_imgmsg(image,"rgb8")
+        img_mss = bridge.cv2_to_imgmsg(image, "rgb8")
     except CvBridgeError as e:
         print(e)
 

@@ -9,7 +9,7 @@ import geometry_msgs.msg as geometry_msgs
 import sensor_msgs.msg as sensor_msgs
 import cv_bridge
 
-from facial_recognition import face_encoding
+from face_recognition_ros import face_encoding
 
 NODE_NAME = 'face_recognition'
 MODEL = '20180402-114759'

@@ -1,11 +1,12 @@
-import sys
+import sys 
+from os import path
 
 import tensorflow as tf
 
 from utils import files
 
-from facenet import compare  # pylint: disable=E0611
-from facenet import facenet  # pylint: disable=E0611
+from facenet.facenet import compare
+from facenet.facenet import facenet
 
 DEFAULT_MODEL = '20180402-114759'
 
