@@ -8,15 +8,13 @@ from utils import files
 from facenet.facenet import compare
 from facenet.facenet import facenet
 
-DEFAULT_MODEL = '20180402-114759'
-
 
 class FacialEncoder:
     """ Facial detector using Tensorflow and Facenet
 
     """
 
-    def __init__(self, session, model=DEFAULT_MODEL):
+    def __init__(self, session, model):
         self.session = session
 
         # Loading model

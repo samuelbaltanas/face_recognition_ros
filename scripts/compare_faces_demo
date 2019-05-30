@@ -15,7 +15,7 @@ if __name__ == "__main__":
 
     with tf.Graph().as_default():
         with tf.Session() as sess:
-            det = face_encoding.FacialDetector(sess)
+            det = face_encoding.FacialEncoder(sess, "20180402-114759.pd")
             images = face_encoding.load_images(test_images)
             mat = embedings.compare_images(det.predict(images))
             embedings.plot_comp_matrix(mat)

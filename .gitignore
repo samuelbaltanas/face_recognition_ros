@@ -1,3 +1,6 @@
+# EDITOR
+.vscode/*
+
 # FACE_RECOGNITION_ROS
 
 data/database/*

@@ -25,8 +25,8 @@ def main(argv):
         with tf.Session() as sess:
             enc = face_encoding.FacialEncoder(sess)
             db = face_matching.FaceDatabase(5)
-            for dir in argv.image_dirs:
-                db.add_identity(dir, enc)
+            for di in argv.image_dirs:
+                db.add_identity(di, enc)
 
             db.save(argv.output)
     return

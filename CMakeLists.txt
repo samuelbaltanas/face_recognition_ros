@@ -1,8 +1,10 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 2.8.7)
 project(face_recognition_ros)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
+add_definitions(-std=c++11)
+
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -13,8 +15,13 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
 )
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules")
+
 ## System dependencies are found with CMake's conventions
+find_package(GFlags)
+find_package(Glog)
 find_package(OpenCV)
+find_package(OpenPose REQUIRED)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -103,7 +110,7 @@ catkin_python_setup()
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
- INCLUDE_DIRS include
+ # INCLUDE_DIRS include
  LIBRARIES face_recognition_ros
  CATKIN_DEPENDS roscpp rospy std_msgs
  # DEPENDS system_lib
@@ -116,8 +123,12 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-  include
+  # include
   ${catkin_INCLUDE_DIRS}
+  ${OpenPose_INCLUDE_DIRS}
+  ${GFLAGS_INCLUDE_DIR}
+  ${GLOG_INCLUDE_DIR}
+  ${OpenCV_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
