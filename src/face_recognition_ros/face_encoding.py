@@ -5,8 +5,9 @@ import tensorflow as tf
 
 from utils import files
 
-from facenet.facenet import compare
-from facenet.facenet import facenet
+sys.path.append(files.PROJECT_ROOT + '/facenet_sandberg/src')
+import compare
+import facenet
 
 
 class FacialEncoder:

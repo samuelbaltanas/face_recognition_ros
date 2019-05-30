@@ -9,7 +9,6 @@ from face_recognition_ros import face_encoding
 from utils import embedings, files
 
 
-
 if __name__ == "__main__":
     test_images = files.get_flw_sample_path([1, 1], [0, 1])
 
