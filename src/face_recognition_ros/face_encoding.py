@@ -5,7 +5,7 @@ import tensorflow as tf
 
 from utils import files
 
-sys.path.append(files.PROJECT_ROOT + '/facenet_sandberg/src')
+sys.path.append(files.PROJECT_ROOT + '/facenet/src')
 import compare
 import facenet
 
