@@ -1,0 +1,36 @@
+STORAGE:
+  database_folder: "" # If empty uses default location PROJECT_ROOT/data/database
+  database_name: "dummy"
+FACENET:
+  compare_threshold: 1.0
+  image_size: [160, 160]
+  model_folder: "" # If empty uses default location PROJECT_ROOT/data/models
+  model_name: "20180402-114759.pd"
+  #image_size: 160
+  #margin: 44
+  #gpu_mem_fraction: 1.0
+OPENPOSE:
+  # For additional info see: https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/include/openpose/flags.hpp
+  # Debugging/Other
+  logging_level: 3
+  disable_multi_thread: false
+  profile_speed: 1000
+  # Rendering
+  render_pose: -1
+  # OpenPose
+  model_folder: "/home/sam/UMA/4/4_2/3-TFG/3-Workspace/openpose/models/" # Pose model path
+  prototxt_path: ""
+  caffemodel_path: ""
+  output_resolution: "-1x-1"
+  num_gpu: -1
+  num_gpu_start: 0
+  keypoint_scale: 0
+  number_people_max: -1
+  maximize_positives: false
+  fps_max: -1.
+  # OpenPose Body Pose
+  body: 1
+  model_pose: "COCO" # Changed 
+  net_resolution: "-1x368"
+  scale_number: 1
+  scale_gap: 0.25

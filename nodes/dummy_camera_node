@@ -21,11 +21,11 @@ def main():
     except CvBridgeError as e:
         print(e)
 
-    #cv.imshow("Image window", image)
-    #cv.waitKey(3)
+    # cv.imshow("Image window", image)
+    # cv.waitKey(3)
 
     rate = ros.Rate(5)
-    
+
     try:
         while not ros.is_shutdown():
             image_pub.publish(img_mss)

@@ -3,12 +3,11 @@ from os import path
 
 import tensorflow as tf
 
-from utils import files
+from face_recognition_ros.utils import files
 
-from facenet.facenet import compare
-from facenet.facenet import facenet
-
-DEFAULT_MODEL = '20180402-114759'
+sys.path.append(files.PROJECT_ROOT + '/facenet/src')
+import compare
+import facenet
 
 
 class FacialEncoder:
@@ -16,7 +15,7 @@ class FacialEncoder:
 
     """
 
-    def __init__(self, session, model=DEFAULT_MODEL):
+    def __init__(self, session, model):
         self.session = session
 
         # Loading model
