@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-
-<launch>
-  <node pkg="face_recognition_ros" type="dummy_camera_node" name="camera"/>
-  <node pkg="face_recognition_ros" type="facial_encoder_node" name="face_recognition" output="screen">
-    <rosparam file="$(find face_recognition_ros)/cfg/test_cpu.yaml" command="load"/>
-  </node>
-</launch>
