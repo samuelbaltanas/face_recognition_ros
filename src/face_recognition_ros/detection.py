@@ -3,11 +3,15 @@
 
     - TODO Profile performance and speed up procedure
         https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/doc/speed_up_openpose.md
-    - TODO Configuration of openpose
 '''
 
 import sys
-from utils import files
+
+import numpy as np
+import cv2 as cv
+
+from face_recognition_ros.extraction import bounding_box, face_extraction
+from face_recognition_ros.utils import files
 
 # Path in which openpose is installed after using `make install`
 # You may comment this line if it is already included in PYTHONPATH
@@ -24,16 +28,12 @@ class FacialDetector():
         """
         self.opwrapper = op.WrapperPython()
         self.opwrapper.configure(params)
+        self.opwrapper.start()
 
     def extract_keypoints(self, image):
         """ Feed image to openpose and return face-related keypoints
             https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/doc/output.md
 
-            Useful keypoints in COCO dataset:
-                - 1: neck
-                - 0: nose
-                - 14/15: left/right eyes
-                - 16/17: left/right sides of head
 
             Params:
                 image: opencv image
@@ -41,27 +41,17 @@ class FacialDetector():
         datum = op.Datum()
         datum.cvInputData = image
         try:
-            self.opwrapper.waitAndPop([datum])
+            self.opwrapper.emplaceAndPop([datum])
         except Exception as e:
             print(e)
             sys.exit(-1)
 
-        keypoints = (datum.poseIds, datum.poseKeypoints)
+        return datum
 
-        # TODO Select keypoints
-        pass
+    def extract_faces(self, image):
+        datum = self.extract_keypoints(image)
 
-        return keypoints
+        bbs = bounding_box.extract_corners(datum)
+        faces = face_extraction.extract_corners_image(image, bbs)
 
-    def __enter__(self):
-        self.opwrapper.start()
-
-    def __exit__(self, type, value, traceback):
-        self.opwrapper.stop()
-
-
-def extract_bounding_box(image, keypoints):
-    """ Extract face from image and return bounding box
-    """
-    # TODO Extract bounding box
-    pass
+        return faces

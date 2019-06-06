@@ -1,13 +1,11 @@
-from __future__ import print_function
-
 import os
 from os import path
 import bisect
 
 import numpy as np
 
-from face_recognition_ros import face_encoding
-from utils import files
+from face_recognition_ros import encoding
+from face_recognition_ros.utils import files
 
 
 class FaceDatabase():
@@ -52,15 +50,14 @@ class FaceDatabase():
         images = [path.join(dir, i) for i in os.listdir(dir)]
 
         n_imgs = min(self.MAX_IMGS, len(images))
-        im = face_encoding.load_images(images[:n_imgs])
+        im = encoding.load_images(images[:n_imgs])
 
         # DONE: Compute embeddings
         emb = face_enc.predict(im)
         self.embeddings = np.vstack((self.embeddings, emb))
 
-        return
-
     def load(self, dir):
+        """ Clear current database and load from files in a directory """
         self.embeddings = np.load(path.join(dir, 'embeddings.npy'),
                                   allow_pickle=False)
 
@@ -72,9 +69,8 @@ class FaceDatabase():
                 self.labels.append(ls[0])
                 self.emb_start.append(int(ls[1]))
 
-        return
-
     def save(self, dir):
+        """ Store current database in a directory """
         np.save(path.join(dir, 'embeddings.npy'),
                 self.embeddings,
                 allow_pickle=False)
@@ -82,8 +78,6 @@ class FaceDatabase():
         with file(path.join(dir, "id.txt"), mode="w") as f:
             for label, n in zip(self.labels, self.emb_start):
                 f.write("{},{}\n".format(label, n))
-
-        return
 
     def __getitem__(self, item):
         i = bisect.bisect_right(self.emb_start, item)
@@ -96,21 +90,3 @@ class FaceDatabase():
 
     def __delitem__(self, item):
         raise NotImplementedError
-
-
-class FaceMatcher():
-
-    def __init__(self, db_dir):
-        # type: (str) -> None
-        self.database = FaceDatabase()
-        self.database.load(db_dir)
-
-    def recognize(self, embeding):
-        # type: (np.ndarray) -> (str, float)
-        dist = np.sqrt(
-            np.sum((self.database.embeddings - embeding)**2, axis=0)
-        )  # type: np.ndarray
-
-        idx = dist.argmin(axis=0)
-
-        return self.database[idx]

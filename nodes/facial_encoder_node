@@ -9,7 +9,7 @@ import geometry_msgs.msg as geometry_msgs
 import sensor_msgs.msg as sensor_msgs
 import cv_bridge
 
-from face_recognition_ros import face_encoding
+from face_recognition_ros import encoding, detection, matching
 
 NODE_NAME = 'face_recognition'
 # MODEL = '20180402-114759.pd'
@@ -18,9 +18,19 @@ NODE_NAME = 'face_recognition'
 class FacialEncoderNode():
 
     def __init__(self, sess):
-        self.face_det = face_encoding.FacialEncoder(sess,
-            ros.get_param("/face_recognition/FACENET")["model"])
+        self.face_enc = encoding.FacialEncoder(
+            sess,
+            ros.get_param("/face_recognition/FACENET")["model"]
+        )
         ros.loginfo('[{}] Facial encoder loaded.'.format(NODE_NAME))
+
+        self.face_det = detection.FacialDetector(
+            ros.get_param("/face_recognition/OPENPOSE")
+        )
+
+        self.face_match = matching.FaceMatcher(
+            ros.get_param("/face_recognition/STORAGE")
+        )
 
         self.bridge = cv_bridge.CvBridge()
         self.img_sub = ros.Subscriber('/camera',
@@ -35,10 +45,15 @@ class FacialEncoderNode():
         except cv_bridge.CvBridgeError as e:
             ros.logerr('[{}] Error: {}'.format(NODE_NAME, e))
 
-        # im = self.face_det.load_images(cv_image)
-        emb = self.face_det.predict([cv_image])
+        faces = self.face_det.extract_faces(cv_image)
+        ros.loginfo('[{}] Faces detected: {}.'.format(NODE_NAME, len(faces)))
+        emb = self.face_enc.predict(faces)
+        ids = self.face_match.recognize(emb)
 
-        ros.loginfo('[{}] Image embeding {}.'.format(NODE_NAME, emb))
+        ros.loginfo('[{}] Persons recognized: {}. \n {}'.format(
+            NODE_NAME,
+            len(ids),
+            ids))
 
 
 def main():

@@ -18,7 +18,7 @@ OPENPOSE:
   # Rendering
   render_pose: -1
   # OpenPose
-  model_folder: "/home/sam/UMA/4/4_2/3-TFG/3-Workspace/openpose/models/" # Pose model path
+  model_folder: "/home/sam/UMA/4/4_2/3-TFG/3-Workspace/openpose/models/" # Model path
   prototxt_path: ""
   caffemodel_path: ""
   output_resolution: "-1x-1"
@@ -31,6 +31,6 @@ OPENPOSE:
   # OpenPose Body Pose
   body: 1
   model_pose: "COCO" # Changed 
-  net_resolution: "-1x368"
+  net_resolution: "320x176"
   scale_number: 1
   scale_gap: 0.25

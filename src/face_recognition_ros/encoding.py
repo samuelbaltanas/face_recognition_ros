@@ -3,7 +3,7 @@ from os import path
 
 import tensorflow as tf
 
-from utils import files
+from face_recognition_ros.utils import files
 
 sys.path.append(files.PROJECT_ROOT + '/facenet/src')
 import compare
