@@ -1,0 +1,41 @@
+#!/usr/bin/env python2
+
+import numpy as np
+import cv2 as cv
+
+import rospy as ros
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge, CvBridgeError
+
+from utils import files
+
+def main():
+    ros.init_node('camera')
+    bridge = CvBridge()
+    image_pub = ros.Publisher("/camera", Image, queue_size=1000)
+
+    image = cv.imread(files.get_flw_sample_path(0)[0], 1)
+
+    try:
+        img_mss = bridge.cv2_to_imgmsg(image, "rgb8")
+    except CvBridgeError as e:
+        print(e)
+
+    # cv.imshow("Image window", image)
+    # cv.waitKey(3)
+
+    rate = ros.Rate(5)
+
+    try:
+        while not ros.is_shutdown():
+            image_pub.publish(img_mss)
+            ros.loginfo("[camera] image sent")
+            rate.sleep()
+    except CvBridgeError as e:
+        print(e)
+
+    ros.spin()
+
+
+if __name__ == "__main__":
+    main()
