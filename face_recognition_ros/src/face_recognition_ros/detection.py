@@ -1,9 +1,6 @@
-''' Face extraction utilities using OpenPose and the COCO dataset.
+""" Face extraction utilities using OpenPose and the COCO dataset.
     https://github.com/CMU-Perceptual-Computing-Lab/openpose
-
-    - TODO Profile performance and speed up procedure
-        https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/doc/speed_up_openpose.md
-'''
+"""
 
 import sys
 
@@ -15,11 +12,11 @@ from face_recognition_ros.utils import files
 
 # Path in which openpose is installed after using `make install`
 # You may comment this line if it is already included in PYTHONPATH
-sys.path.append('/usr/local/python/')
+sys.path.append("/usr/local/python/")
 from openpose import pyopenpose as op
 
 
-class FacialDetector():
+class FacialDetector:
     def __init__(self, params):
         """ Initialize openpose
 

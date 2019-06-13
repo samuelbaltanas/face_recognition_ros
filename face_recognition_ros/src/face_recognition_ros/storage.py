@@ -8,7 +8,7 @@ from face_recognition_ros import encoding
 from face_recognition_ros.utils import files
 
 
-class FaceDatabase():
+class FaceDatabase:
     """ Class used for the load/storage of previously known faces.
 
         Our face recongition system collects a set of embeddings
@@ -23,6 +23,7 @@ class FaceDatabase():
                 To verify each correspondence with an identity, lookup
                 the position in emb_start.
     """
+
     def __init__(self, MAX_IMGS=np.Inf):
         self.MAX_IMGS = MAX_IMGS
 
@@ -58,8 +59,9 @@ class FaceDatabase():
 
     def load(self, dir):
         """ Clear current database and load from files in a directory """
-        self.embeddings = np.load(path.join(dir, 'embeddings.npy'),
-                                  allow_pickle=False)
+        self.embeddings = np.load(
+            path.join(dir, "embeddings.npy"), allow_pickle=False
+        )
 
         self.emb_start = []
         self.labels = []
@@ -71,9 +73,11 @@ class FaceDatabase():
 
     def save(self, dir):
         """ Store current database in a directory """
-        np.save(path.join(dir, 'embeddings.npy'),
-                self.embeddings,
-                allow_pickle=False)
+        np.save(
+            path.join(dir, "embeddings.npy"),
+            self.embeddings,
+            allow_pickle=False,
+        )
 
         with file(path.join(dir, "id.txt"), mode="w") as f:
             for label, n in zip(self.labels, self.emb_start):

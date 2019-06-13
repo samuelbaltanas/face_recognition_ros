@@ -10,19 +10,19 @@ def compare_images(embedings):
     for i in range(n_imgs):
         for j in range(n_imgs):
             mat[i, j] = np.sqrt(
-                np.sum((embedings[i, :] - embedings[j, :])**2)
+                np.sum((embedings[i, :] - embedings[j, :]) ** 2)
             )
     return mat
 
 
 def plot_comp_matrix(mat):
     n_imgs = mat.shape[0]
-    print('    ', end='')
+    print("    ", end="")
     for i in range(n_imgs):
-        print('    %1d     ' % i, end='')
-    print('')
+        print("    %1d     " % i, end="")
+    print("")
     for i in range(n_imgs):
-        print('%1d  ' % i, end='')
+        print("%1d  " % i, end="")
         for j in range(n_imgs):
-            print('  %1.4f  ' % mat[i, j], end='')
-        print('')
+            print("  %1.4f  " % mat[i, j], end="")
+        print("")

@@ -22,7 +22,7 @@ def extract_bounding_boxes(datum, confidence_threshold=0.01):
             continue
 
         feats = person[[0, 1, 16, 17], 0:2]
-        vec = (20.9/16.1)*(feats[3] - feats[2])/2
+        vec = (20.9 / 16.1) * (feats[3] - feats[2]) / 2
 
         top = feats[0] - vec[::-1]
         bot = feats[0] + vec[::-1]
@@ -42,22 +42,22 @@ def extract_corners(datum, confidence_threshold=0.0):
     for person in datum.poseKeypoints:
         REQ_KEYPOINTS = [16, 17]
 
+        # Failure condition
         if np.any(person[REQ_KEYPOINTS, 2] <= confidence_threshold):
             # print person[[16, 17], 2]
             continue
 
+        # Vectors
         fts = person[[0, 1, 16, 17], 0:2]
-        vec = (20.9/16.1)*(fts[3] - fts[2])/2
-
+        vec = (20.9 / 16.1) * (fts[3] - fts[2]) / 2
         rev = vec[::-1]
         rev[0] *= -1
 
+        # Corners
         topl = fts[2] - rev
         botr = fts[3] + rev
-
         topr = fts[3] - rev
         botl = fts[2] + rev
-
         bb = np.float32([topl, topr, botl, botr])
 
         bbs.append(bb)

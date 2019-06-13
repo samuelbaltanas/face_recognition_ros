@@ -7,20 +7,25 @@ import yaml
 
 from face_recognition_ros.utils import files
 
-CONFIG_PATH = files.PROJECT_ROOT + "/cfg/"
+CONFIG_PATH = os.path.join(files.PROJECT_ROOT, "cfg")
 DEFAULT_CFG = "test_cpu_fast.yaml"
 
+
 def cat_config(cfg=DEFAULT_CFG):
-    with open(CONFIG_PATH + cfg) as f:
+    FULL_PATH = os.path.join(CONFIG_PATH, cfg)
+    with open(FULL_PATH) as f:
         print(f.read())
+
 
 def list_config():
     print(os.listdir(CONFIG_PATH))
 
+
 def load_config(cfg=DEFAULT_CFG):
     global CONFIG
+    FULL_PATH = os.path.join(CONFIG_PATH, cfg)
     try:
-        with open(CONFIG_PATH + cfg, "r") as f:
+        with open(FULL_PATH, "r") as f:
             CONFIG = yaml.load(f)
     except Exception as e:
         print("[ERR] Configuration file cannot be loaded.", file=sys.stderr)

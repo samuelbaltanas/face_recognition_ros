@@ -10,19 +10,18 @@ import sensor_msgs.msg as sensor_msgs
 import cv_bridge
 
 from face_recognition_ros import encoding, detection, matching
+from face_recognition_ros_msgs.msg import BoundingBox, Identities
 
-NODE_NAME = 'face_recognition'
+NODE_NAME = "face_recognition"
 # MODEL = '20180402-114759.pd'
 
 
-class FacialEncoderNode():
-
+class FacialEncoderNode:
     def __init__(self, sess):
         self.face_enc = encoding.FacialEncoder(
-            sess,
-            ros.get_param("/face_recognition/FACENET")["model"]
+            sess, ros.get_param("/face_recognition/FACENET")["model"]
         )
-        ros.loginfo('[{}] Facial encoder loaded.'.format(NODE_NAME))
+        ros.loginfo("[{}] Facial encoder loaded.".format(NODE_NAME))
 
         self.face_det = detection.FacialDetector(
             ros.get_param("/face_recognition/OPENPOSE")
@@ -33,27 +32,28 @@ class FacialEncoderNode():
         )
 
         self.bridge = cv_bridge.CvBridge()
-        self.img_sub = ros.Subscriber('/camera',
-                                      sensor_msgs.Image,
-                                      self.imageCallback)
+        self.img_sub = ros.Subscriber(
+            "/camera", sensor_msgs.Image, self.imageCallback, buff_size=1
+        )
 
     def imageCallback(self, msg):
-        ros.loginfo('[{}] Image received.'.format(NODE_NAME))
+        ros.loginfo("[{}] Image received.".format(NODE_NAME))
 
         try:
             cv_image = self.bridge.imgmsg_to_cv2(msg, "rgb8")
         except cv_bridge.CvBridgeError as e:
-            ros.logerr('[{}] Error: {}'.format(NODE_NAME, e))
+            ros.logerr("[{}] Error: {}".format(NODE_NAME, e))
 
         faces = self.face_det.extract_faces(cv_image)
-        ros.loginfo('[{}] Faces detected: {}.'.format(NODE_NAME, len(faces)))
+        ros.loginfo("[{}] Faces detected: {}.".format(NODE_NAME, len(faces)))
         emb = self.face_enc.predict(faces)
         ids = self.face_match.recognize(emb)
 
-        ros.loginfo('[{}] Persons recognized: {}. \n {}'.format(
-            NODE_NAME,
-            len(ids),
-            ids))
+        ros.loginfo(
+            "[{}] Persons recognized: {}. \n {}".format(
+                NODE_NAME, len(ids), ids
+            )
+        )
 
 
 def main():
@@ -65,8 +65,10 @@ def main():
             try:
                 ros.spin()
             except KeyboardInterrupt:
-                ros.logerr('[{}] KeyboardInterrupt. Shutting down.'
-                           .format(NODE_NAME))
+                ros.logerr(
+                    "[{}] KeyboardInterrupt. Shutting down.".format(NODE_NAME)
+                )
+
 
 if __name__ == "__main__":
     main()

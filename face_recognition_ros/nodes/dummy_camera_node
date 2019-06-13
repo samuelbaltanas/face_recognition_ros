@@ -9,8 +9,9 @@ from cv_bridge import CvBridge, CvBridgeError
 
 from utils import files
 
+
 def main():
-    ros.init_node('camera')
+    ros.init_node("camera")
     bridge = CvBridge()
     image_pub = ros.Publisher("/camera", Image, queue_size=1000)
 

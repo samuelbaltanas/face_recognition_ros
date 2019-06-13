@@ -16,13 +16,15 @@ def extract_corners_image(image, bbs, shape=(160, 160)):
     faces = []
 
     for bb in bbs:
-        fitted = np.float32([[0, 0], [shape[0], 0],
-                            [0, shape[1]], [shape[0], shape[1]]])
+        fitted = np.float32(
+            [[0, 0], [shape[0], 0], [0, shape[1]], [shape[0], shape[1]]]
+        )
         M = cv2.getPerspectiveTransform(bb, fitted)
         fac = cv2.warpPerspective(image, M, shape)
         faces.append(fac)
-    
+
     return faces
+
 
 """
 def extract_corners_homograpy(image, bbs, shape=(160, 160)):
@@ -38,6 +40,6 @@ def extract_corners_homograpy(image, bbs, shape=(160, 160)):
         H = cv2.findHomography(inh, outh)[0]
         fac = cv2.warpPerspective(image, H, shape)
         faces.append(fac)
-    
+
     return faces
 """
