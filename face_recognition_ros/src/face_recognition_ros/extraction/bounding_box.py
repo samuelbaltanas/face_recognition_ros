@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.spatial.distance import cdist
 
 
 def extract_bounding_boxes(datum, confidence_threshold=0.01):
@@ -40,26 +41,34 @@ def extract_bounding_boxes(datum, confidence_threshold=0.01):
 def extract_corners(datum, confidence_threshold=0.0):
     bbs = []
     for person in datum.poseKeypoints:
-        REQ_KEYPOINTS = [16, 17]
+        if np.all(person[[16, 17, 0], 2] > confidence_threshold):
+            # Best condition: two sides present
+            ratio = 20.9 / 16.1
+            # Side to side vector
+            v = person[17, 0:2] - person[16, 0:2]
+            vt = -ratio * v[::-1]
 
-        # Failure condition
-        if np.any(person[REQ_KEYPOINTS, 2] <= confidence_threshold):
-            # print person[[16, 17], 2]
-            continue
+            # Corners
+            center = np.mean(person[[0, 16, 17, 14, 15], 0:2], axis=0)
+            topl = center + (vt - v) / 2
+            botr = center + (v - vt) / 2
+            topr = center + (v + vt) / 2
+            botl = center - (v + vt) / 2
+            bb = np.float32([topl, topr, botl, botr])
 
-        # Vectors
-        fts = person[[0, 1, 16, 17], 0:2]
-        vec = (20.9 / 16.1) * (fts[3] - fts[2]) / 2
-        rev = vec[::-1]
-        rev[0] *= -1
+            bbs.append(bb)
+        elif np.all(person[[15, 17, 0], 2] > confidence_threshold) or np.all(
+            person[[14, 16, 0], 2] > confidence_threshold
+        ):
+            # Worse condition: one side only
+            leftie = np.all(person[[15, 17, 0], 2] > confidence_threshold)
+            pts = [16, 0, 14, 15] if leftie else [17, 0, 15, 14]
 
-        # Corners
-        topl = fts[2] - rev
-        botr = fts[3] + rev
-        topr = fts[3] - rev
-        botl = fts[2] + rev
-        bb = np.float32([topl, topr, botl, botr])
+            center = np.mean(person[pts, 0:2], axis=0)
+            leftmost_idx = np.argmax(
+                cdist(person[pts[0], 0:2], person[pts[1:], 0:2])
+            )
 
-        bbs.append(bb)
+            v = person[pts[0], 0:2] - person[leftmost_idx, 0:2]
 
     return bbs
