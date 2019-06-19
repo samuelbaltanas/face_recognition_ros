@@ -18,8 +18,9 @@ NODE_NAME = "face_recognition"
 
 class FacialEncoderNode:
     def __init__(self, sess):
+        # TODO: Make classes from face_recognition_ros to implicitely load config
         self.face_enc = encoding.FacialEncoder(
-            sess, ros.get_param("/face_recognition/FACENET")["model"]
+            sess, ros.get_param("/face_recognition/FACENET")
         )
         ros.loginfo("[{}] Facial encoder loaded.".format(NODE_NAME))
 
@@ -33,8 +34,13 @@ class FacialEncoderNode:
 
         self.bridge = cv_bridge.CvBridge()
         self.img_sub = ros.Subscriber(
-            "/camera", sensor_msgs.Image, self.imageCallback, buff_size=1
+            ros.get_param("/face_recognition/ROS/camera_topic"),
+            sensor_msgs.Image,
+            self.imageCallback,
+            buff_size=1,
         )
+
+        ros.loginfo("[{0}] Node: {0} ready.".format(NODE_NAME))
 
     def imageCallback(self, msg):
         ros.loginfo("[{}] Image received.".format(NODE_NAME))
@@ -54,6 +60,7 @@ class FacialEncoderNode:
                 NODE_NAME, len(ids), ids
             )
         )
+        # TODO: Output ros message
 
 
 def main():

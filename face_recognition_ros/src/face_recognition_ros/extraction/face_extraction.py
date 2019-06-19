@@ -6,7 +6,8 @@ def extract_bounding_box_image(image, bbs):
     faces = []
 
     for bb in bbs:
-        face = image[bb[0]:bb[1], bb[2]:bb[3]]
+        # TODO: Fix black options
+        face = image[bb[0] : bb[1], bb[2] : bb[3]]
         face = cv2.resize(image, (160, 160), interpolation=cv2.INTER_AREA)
 
     return faces

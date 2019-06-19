@@ -15,11 +15,11 @@ class FacialEncoder:
 CONFIG_PATH + cfg
     """
 
-    def __init__(self, session, model):
+    def __init__(self, session, config):
         self.session = session
 
         # Loading model
-        facenet.load_model(files.get_model_path(model))
+        facenet.load_model(files.get_model_path(config["model_name"]))
 
         # Tensors
         def_graph = tf.get_default_graph()

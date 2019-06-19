@@ -1,5 +1,17 @@
+""" Bounding box extraction
+
+
+"""
 import numpy as np
-from scipy.spatial.distance import cdist
+
+# from scipy.spatial.distance import cdist
+
+# TODO: Change to classes
+# TODO: Extract info of which pose correspond to which box
+# TODO: Keypoints are reversed sometimes (RL or LR)
+# TODO: Missing side face extraction (1 eye missing)
+# DONE: Frontal face (Both sides available)
+# DONE: Partial side face (Both eyes available)
 
 
 def extract_bounding_boxes(datum, confidence_threshold=0.01):
@@ -43,7 +55,9 @@ def extract_corners(datum, confidence_threshold=0.00):
     for p in datum.poseKeypoints:
         pres = p[:, 2] > confidence_threshold
 
-        if pres[17] and pres[16]:
+        if not np.any(pres[[14, 15, 0]]):
+            continue
+        elif pres[17] and pres[16]:
             # Best condition: two sides present
             ratio = 20.9 / 16.1
 

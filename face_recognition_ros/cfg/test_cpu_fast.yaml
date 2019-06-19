@@ -1,11 +1,14 @@
+ROS:
+  camera_topic: "/camera"
+  identity_topic: "/face_ids"
 STORAGE:
-  database_folder: "" # If empty uses default location PROJECT_ROOT/data/database
+  database_folder: "" # If empty uses default location [PROJECT_ROOT]/data/database
   database_name: "dummy"
 FACENET:
   compare_threshold: 1.0
   image_size: [160, 160]
-  model_folder: "" # If empty uses default location PROJECT_ROOT/data/models
-  model_name: "20180402-114759.pd"
+  model_folder: "" # If empty uses default location [PROJECT_ROOT ]/data/models
+  model_name: "20180402-114759.pd" # Can load frozen models ([...].pd) or a checkpoint from a directory ([...]/)
   #image_size: 160
   #margin: 44
   #gpu_mem_fraction: 1.0
@@ -30,7 +33,7 @@ OPENPOSE:
   fps_max: -1.
   # OpenPose Body Pose
   body: 1
-  model_pose: "COCO" # Changed 
-  net_resolution: "320x176"
+  model_pose: "COCO" # Changed
+  net_resolution: "-1x176" # Halfed resolution to improve performance (default: -1x368)
   scale_number: 1
   scale_gap: 0.25
