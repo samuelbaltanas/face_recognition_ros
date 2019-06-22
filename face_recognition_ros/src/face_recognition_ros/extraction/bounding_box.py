@@ -10,6 +10,7 @@ import numpy as np
 # TODO: Extract info of which pose correspond to which box
 # TODO: Keypoints are reversed sometimes (RL or LR)
 # TODO: Missing side face extraction (1 eye missing)
+# TODO: Incorporate ideas from https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/src/openpose/face/faceDetector.cpp
 # DONE: Frontal face (Both sides available)
 # DONE: Partial side face (Both eyes available)
 

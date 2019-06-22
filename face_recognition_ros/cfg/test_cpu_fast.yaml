@@ -33,7 +33,7 @@ OPENPOSE:
   fps_max: -1.
   # OpenPose Body Pose
   body: 1
-  model_pose: "COCO" # Changed
-  net_resolution: "-1x176" # Halfed resolution to improve performance (default: -1x368)
+  model_pose: "COCO"
+  net_resolution: "-1x176" # Halved resolution to improve performance (default: -1x368)
   scale_number: 1
   scale_gap: 0.25
