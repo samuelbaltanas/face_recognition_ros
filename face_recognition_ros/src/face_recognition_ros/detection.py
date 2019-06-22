@@ -7,7 +7,7 @@ import sys
 import numpy as np
 import cv2 as cv
 
-from face_recognition_ros.extraction import bounding_box, face_extraction
+from face_recognition_ros.extraction import oriented_bounding_box
 from face_recognition_ros.utils import files
 
 # Path in which openpose is installed after using `make install`
@@ -48,7 +48,7 @@ class FacialDetector:
     def extract_faces(self, image):
         datum = self.extract_keypoints(image)
 
-        bbs = bounding_box.extract_corners(datum)
-        faces = face_extraction.extract_corners_image(image, bbs)
+        bbs = oriented_bounding_box.extract_from_pose(datum)
+        faces = oriented_bounding_box.extract_image_faces(image, bbs)
 
         return faces
