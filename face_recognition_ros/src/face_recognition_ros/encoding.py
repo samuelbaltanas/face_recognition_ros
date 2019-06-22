@@ -15,11 +15,11 @@ class FacialEncoder:
 CONFIG_PATH + cfg
     """
 
-    def __init__(self, session, model):
+    def __init__(self, session, config):
         self.session = session
 
         # Loading model
-        facenet.load_model(files.get_model_path(model))
+        facenet.load_model(files.get_model_path(config["model_name"]))
 
         # Tensors
         def_graph = tf.get_default_graph()
@@ -37,6 +37,7 @@ CONFIG_PATH + cfg
         return self.session.run(self._embeddings, feed_dict=feed_dict)
 
 
+# TODO : Delete
 def load_images(image_files, image_size=160, margin=44, gpu_mem_fraction=1.0):
     # type: (str, int, int, float) -> Any
     """ Loads and aligns the images from file

@@ -1,3 +1,6 @@
+# TODO: User path expansion
+# TODO: Use path joins
+# TODO: Better checks + incorporate config files
 import os
 from os import path
 
@@ -19,6 +22,10 @@ def get_flw_path(person=""):
     )
 
 
+def get_face_database(db):
+    return "{}/data/database/{}".format(PROJECT_ROOT, db)
+
+
 def get_flw_sample_path(person, img=None):
     if not isinstance(person, list):
         person = [person]
@@ -38,7 +45,3 @@ def get_flw_sample_path(person, img=None):
     ]
 
     return person_img
-
-
-def get_face_database(db):
-    return "{}/data/database/{}".format(PROJECT_ROOT, db)

@@ -1,3 +1,4 @@
+# TODO: Rename file or move to extraction
 import numpy as np
 import matplotlib.pyplot as plt
 import cv2 as cv
