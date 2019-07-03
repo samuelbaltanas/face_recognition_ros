@@ -5,13 +5,16 @@ from os import path
 import numpy as np
 
 from face_recognition_ros import storage
-from face_recognition_ros.utils import files
+from face_recognition_ros.utils import files, config
 
 
 class FaceMatcher:
-    def __init__(self, storage_config):
+    def __init__(self, conf=None):
         # type: (dict) -> None
         self.database = storage.FaceDatabase()
+        if conf is None:
+            conf = config.CONFIG
+        storage_config = conf["STORAGE"]
 
         if storage_config["database_folder"] == "":
             data_path = files.get_face_database(

@@ -26,7 +26,7 @@ def extract_from_pose(datum, confidence_threshold=0.00):
     return bbs
 
 
-def extract_image_faces(image, bbs, shape=(160, 160)):
+def extract_image_faces(bbs, image, shape=(160, 160)):
     faces = []
 
     for idx, bb in bbs:

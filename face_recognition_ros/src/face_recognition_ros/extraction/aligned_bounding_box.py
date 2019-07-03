@@ -3,7 +3,7 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 
-# TODO: Enumerate
+# DONE: Enumerate
 
 
 def extract_from_pose(datum, confidence_threshold=0.01):
@@ -12,7 +12,7 @@ def extract_from_pose(datum, confidence_threshold=0.01):
 
     imgshape = datum.cvOutputData.shape
 
-    for p in datum.poseKeypoints:
+    for idx, p in enumerate(datum.poseKeypoints):
         # bb = sample_face_detector(p, confidence_threshold)
         bb = openpose_face_detector(p, confidence_threshold)
 
@@ -30,32 +30,37 @@ def extract_from_pose(datum, confidence_threshold=0.01):
         if bb2[0] >= bb2[1] or bb2[2] >= bb2[3]:
             continue
 
-        bbs.append(bb2)
+        bbs.append((idx, bb2))
 
     return bbs
 
 
-def sample_face_detector(p, confidence_threshold):
-    REQ_KEYPOINTS = [16, 17]
-    bb = np.zeros(4, dtype=int)
+def extract_image_faces(bbs, image, shape=(160, 160)):
+    faces = []
 
-    # Skip incomplete poses (we cannot extract a fake)
-    if np.any(p[REQ_KEYPOINTS, 2] <= confidence_threshold):
-        # print person[[16, 17], 2]
-        return None
+    for idx, bb in bbs:
+        face = image[bb[0] : bb[1], bb[2] : bb[3]]
+        face = cv2.resize(face, shape, interpolation=cv2.INTER_AREA)
+        faces.append((idx, face))
 
-    feats = p[[0, 1, 16, 17], 0:2]
-    vec = (20.9 / 16.1) * (feats[3] - feats[2]) / 2
+    return faces
 
-    top = feats[0] - vec[::-1]
-    bot = feats[0] + vec[::-1]
 
-    bb[0] = int(top[1])
-    bb[1] = int(bot[1])
-    bb[2] = int(feats[2, 0])
-    bb[3] = int(feats[3, 0])
+def plot_bounding_box(
+    image, bbs, color=(0, 255, 0), color_enc=None, thickness=10
+):
+    imbb = image.copy()
 
-    return bb
+    if color_enc is not None:
+        imbb = cv2.cvtColor(imbb, color_enc)
+
+    for _, bb in bbs:
+        imbb = cv2.rectangle(
+            imbb, (bb[2], bb[0]), (bb[3], bb[1]), color, thickness=thickness
+        )
+
+    plt.imshow(imbb)
+    return imbb
 
 
 def dist(x, y):
@@ -63,6 +68,7 @@ def dist(x, y):
 
 
 def openpose_face_detector(posePtr, threshold):
+    # TODO: Divide face size in v_size and h_size
     point_top_left = np.zeros(2)
     face_size = 0.0
 
@@ -129,29 +135,24 @@ def openpose_face_detector(posePtr, threshold):
     )
 
 
-def extract_image_faces(bbs, image):
-    faces = []
+def sample_face_detector(p, confidence_threshold):
+    REQ_KEYPOINTS = [16, 17]
+    bb = np.zeros(4, dtype=int)
 
-    for bb in bbs:
-        face = image[bb[0] : bb[1], bb[2] : bb[3]]
-        face = cv2.resize(face, (160, 160), interpolation=cv2.INTER_AREA)
-        faces.append(face)
+    # Skip incomplete poses (we cannot extract a fake)
+    if np.any(p[REQ_KEYPOINTS, 2] <= confidence_threshold):
+        # print person[[16, 17], 2]
+        return None
 
-    return faces
+    feats = p[[0, 1, 16, 17], 0:2]
+    vec = (20.9 / 16.1) * (feats[3] - feats[2]) / 2
 
+    top = feats[0] - vec[::-1]
+    bot = feats[0] + vec[::-1]
 
-def plot_bounding_box(
-    image, bbs, color=(0, 255, 0), color_enc=None, thickness=10
-):
-    imbb = image.copy()
+    bb[0] = int(top[1])
+    bb[1] = int(bot[1])
+    bb[2] = int(feats[2, 0])
+    bb[3] = int(feats[3, 0])
 
-    if color_enc is not None:
-        imbb = cv2.cvtColor(imbb, color_enc)
-
-    for bb in bbs:
-        imbb = cv2.rectangle(
-            imbb, (bb[2], bb[0]), (bb[3], bb[1]), color, thickness=thickness
-        )
-
-    plt.imshow(imbb)
-    return imbb
+    return bb

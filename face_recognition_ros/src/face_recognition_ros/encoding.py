@@ -1,9 +1,12 @@
 import sys
 from os import path
 
+import numpy as np
 import tensorflow as tf
 
-from face_recognition_ros.utils import files
+from face_recognition_ros import image_preprocessing
+from face_recognition_ros.utils import files, config
+
 
 sys.path.append(path.join(files.PROJECT_ROOT, "../facenet/src"))
 import compare
@@ -11,15 +14,16 @@ import facenet
 
 
 class FacialEncoder:
-    """ Facial detector using Tensorflow and Facenet
-CONFIG_PATH + cfg
-    """
+    """ Facial detector using Tensorflow and Facenet """
 
-    def __init__(self, session, config):
+    def __init__(self, session, conf=None):
         self.session = session
 
+        if conf is None:
+            conf = config.CONFIG
+
         # Loading model
-        facenet.load_model(files.get_model_path(config["model_name"]))
+        facenet.load_model(files.get_model_path(conf["FACENET"]["model_name"]))
 
         # Tensors
         def_graph = tf.get_default_graph()
@@ -30,10 +34,15 @@ CONFIG_PATH + cfg
         )
 
     def predict(self, images):
+        #images = map(
+        #    lambda x: image_preprocessing.preprocess_face(x[1]), images
+        #)
+
         feed_dict = {
             self._images_placeholder: images,
             self._phase_train_placeholder: False,
         }
+
         return self.session.run(self._embeddings, feed_dict=feed_dict)
 
 
