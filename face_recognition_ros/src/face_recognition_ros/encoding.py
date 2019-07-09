@@ -34,9 +34,9 @@ class FacialEncoder:
         )
 
     def predict(self, images):
-        #images = map(
+        # images = map(
         #    lambda x: image_preprocessing.preprocess_face(x[1]), images
-        #)
+        # )
 
         feed_dict = {
             self._images_placeholder: images,

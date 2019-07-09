@@ -16,6 +16,40 @@ import matplotlib.pyplot as plt
 # DONE: Partial side face (Both eyes available)
 
 
+class EllipseDetection:
+    def __init__(self, id, bb, score):
+        self.id = id
+        self.bb = bb
+        self.score = score
+
+    def extract_face(self, image, shape=None):
+        if shape is None:
+            shape = (160, 160)
+        fitted = np.float32(
+            [[0, 0], [shape[0], 0], [0, shape[1]], [shape[0], shape[1]]]
+        )
+        M = cv2.getPerspectiveTransform(self.bb, fitted)
+        face = cv2.warpPerspective(image, M, shape)
+        return face
+
+    def __repr__(self):
+        major_axis_radius = 0
+        minor_axis_radius = 0
+        angle = 0
+        center_x = 0
+        center_y = 0
+        detection_score = 0
+
+        return "{} {} {} {} {} {}".format(
+            major_axis_radius,
+            minor_axis_radius,
+            angle,
+            center_x,
+            center_y,
+            detection_score,
+        )
+
+
 def extract_from_pose(datum, confidence_threshold=0.00):
     bbs = []
     for idx, p in enumerate(datum.poseKeypoints):

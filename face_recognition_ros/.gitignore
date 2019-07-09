@@ -1,8 +1,10 @@
+.vscode
 # FACE_RECOGNITION_ROS
 
 data/database/*
 data/datasets/*
 data/models/*
+data/FDDB-folds/*
 
 # DEFAULT ROS
 
