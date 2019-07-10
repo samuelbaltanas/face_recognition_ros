@@ -3,6 +3,7 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 
+# TODO: Delete
 # DONE: Enumerate
 
 
@@ -61,10 +62,6 @@ def plot_bounding_box(
 
     plt.imshow(imbb)
     return imbb
-
-
-def dist(x, y):
-    return np.sqrt(np.sum((x - y) ** 2))
 
 
 def openpose_face_detector(posePtr, threshold):

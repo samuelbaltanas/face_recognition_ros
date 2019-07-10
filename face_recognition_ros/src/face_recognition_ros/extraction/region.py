@@ -2,6 +2,8 @@
 import numpy as np
 import cv2
 
+from face_recognition_ros.utils.math import rotate
+
 
 class RectangleRegion:
     def __init__(
@@ -91,7 +93,7 @@ class EllipseRegion:
         return cv2.ellipse(
             image,
             (int(self.center[0, 0]), int(self.center[1, 0])),
-            (int(self.axis_radius[0, 0] * 2), int(self.axis_radius[1, 0] * 2)),
+            (int(self.axis_radius[0, 0]), int(self.axis_radius[1, 0])),
             angle=self.angle * 180 / np.pi,
             startAngle=0,
             endAngle=360,
@@ -120,14 +122,3 @@ class EllipseRegion:
             self.center[1, 0],
             self.detection_score,
         )
-
-
-def rotate(point, angle, origin):
-    c, s = np.cos(angle), np.sin(angle)
-    R = np.array([[c, -s], [s, c]])
-    return (R.dot(point - origin)) + origin
-
-
-if __name__ == "__main__":
-    rect = EllipseRegion(major_axis_radius=3, minor_axis_radius=2)
-    rect.to_bounding_box()

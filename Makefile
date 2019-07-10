@@ -15,13 +15,17 @@ clean-pyc: ## remove Python file artifacts
 	find . -name '*~' -exec rm -f {} +
 	find . -name '__pycache__' -exec rm -fr {} +
 
-lint: ## check style with flake8
-	flake8 src/face_recognition_ros
+#lint: ## check style with flake8
+#	flake8 src/face_recognition_ros
 
-dist: clean ## builds source and wheel package
-	python setup.py sdist
-	python setup.py bdist_wheel
-	ls -l dist
+#dist: clean ## builds source and wheel package
+#	python setup.py sdist
+#	python setup.py bdist_wheel
+#	ls -l dist
 
-install: clean ## install the package to the active Python's site-packages
-	python setup.py install
+#install: clean ## install the package to the active Python's site-packages
+#	python setup.py install
+
+build: clean
+	cd ~/catkin_ws; \
+	catkin_make

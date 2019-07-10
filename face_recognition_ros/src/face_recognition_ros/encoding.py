@@ -47,19 +47,19 @@ class FacialEncoder:
 
 
 # TODO : Delete
-def load_images(image_files, image_size=160, margin=44, gpu_mem_fraction=1.0):
-    # type: (str, int, int, float) -> Any
-    """ Loads and aligns the images from file
+# def load_images(image_files, image_size=160, margin=44, gpu_mem_fraction=1.0):
+#     # type: (str, int, int, float) -> Any
+#     """ Loads and aligns the images from file
 
-        Args:
-            image_files: Path of the images to compare
-            image_size: Size of the images
-            margin:
-            gpu_mem_fraction:
+#         Args:
+#             image_files: Path of the images to compare
+#             image_size: Size of the images
+#             margin:
+#             gpu_mem_fraction:
 
-        Return:
-            Array of loaded images
-    """
-    return compare.load_and_align_data(
-        image_files, image_size, margin, gpu_mem_fraction
-    )
+#         Return:
+#             Array of loaded images
+#     """
+#     return compare.load_and_align_data(
+#         image_files, image_size, margin, gpu_mem_fraction
+#     )
