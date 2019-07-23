@@ -7,7 +7,7 @@ STORAGE:
 FACENET:
   compare_threshold: 1.0
   image_size: [160, 160]
-  model_folder: "" # If empty uses default location [PROJECT_ROOT ]/data/models
+  model_folder: "" # If empty uses default location [PROJECT_ROOT]/data/models
   model_name: "20180402-114759.pd" # Can load frozen models ([...].pd) or a checkpoint from a directory ([...]/)
   #image_size: 160
   #margin: 44
@@ -15,7 +15,7 @@ FACENET:
 OPENPOSE:
   # For additional info see: https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/include/openpose/flags.hpp
   # Debugging/Other
-  logging_level: 3
+  logging_level: 2
   disable_multi_thread: false
   profile_speed: 1000
   # Rendering
@@ -34,6 +34,6 @@ OPENPOSE:
   # OpenPose Body Pose
   body: 1
   model_pose: "COCO"
-  net_resolution: "-1x176" # Halved resolution to improve performance (default: -1x368)
+  net_resolution: "-1x368" # Halved resolution to improve performance (default: -1x368)
   scale_number: 1
   scale_gap: 0.25

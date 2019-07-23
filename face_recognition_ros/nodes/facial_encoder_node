@@ -1,17 +1,16 @@
 #!/usr/bin/env python2
 
-import cv2 as cv
+# TODO REDO
+
 
 import tensorflow as tf
 import rospy as ros
-import geometry_msgs.msg as geometry_msgs
 import sensor_msgs.msg as sensor_msgs
 import cv_bridge
 
 # from face_recognition_ros import encoding, detection, matching
 # from face_recognition_ros.utils import config
 import face_recognition_ros as face_ros
-from face_recognition_ros_msgs.msg import BoundingBox, Identities
 
 NODE_NAME = "face_recognition"
 # MODEL = '20180402-114759.pd'
@@ -51,9 +50,7 @@ class FacialEncoderNode:
         ids = self.face_match.recognize(emb)
 
         ros.loginfo(
-            "[{}] Persons recognized: {}. \n {}".format(
-                NODE_NAME, len(ids), ids
-            )
+            "[{}] Persons recognized: {}. \n {}".format(NODE_NAME, len(ids), ids)
         )
         # TODO: Output ros message
 
@@ -64,14 +61,12 @@ def main():
             ros.init_node(NODE_NAME)
             face_ros.load_config(ros.get_param("/face_recognition"))
 
-            node = FacialEncoderNode(sess)
+            FacialEncoderNode(sess)
 
             try:
                 ros.spin()
             except KeyboardInterrupt:
-                ros.logerr(
-                    "[{}] KeyboardInterrupt. Shutting down.".format(NODE_NAME)
-                )
+                ros.logerr("[{}] KeyboardInterrupt. Shutting down.".format(NODE_NAME))
 
 
 if __name__ == "__main__":

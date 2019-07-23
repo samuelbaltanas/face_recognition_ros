@@ -18,11 +18,11 @@ class RectangleRegion:
             shape = (160, 160)
 
         face = image[
-            int(self.origin[0, 0]) : int(
-                self.origin[0, 0] + self.dimensions[0, 0]
+            max(int(self.origin[1, 0]), 0) : min(
+                int(self.origin[1, 0] + self.dimensions[1, 0]), image.shape[0]
             ),
-            int(self.origin[1, 0]) : int(
-                self.origin[1, 0] + self.dimensions[1, 0]
+            max(int(self.origin[0, 0]), 0) : min(
+                int(self.origin[0, 0] + self.dimensions[0, 0]), image.shape[1]
             ),
         ]
         face = cv2.resize(face, shape, interpolation=cv2.INTER_AREA)
@@ -38,10 +38,23 @@ class RectangleRegion:
 
         return res
 
-    def draw(self, image, color=(0, 255, 255), thickness=5):
+    def draw(self, image, color=(0, 255, 255), thickness=3, score=False, font_scale=3):
         bb = self.to_bounding_box()
         bb = bb.reshape((-1, 1, 2))
-        image = cv2.polylines(image, np.int64([bb]), True, color, thickness)
+        image = cv2.polylines(
+            image, np.int64([bb]), isClosed=True, color=color, thickness=thickness
+        )
+        if score:
+            image = cv2.putText(
+                image,
+                "{0:.2f}".format(self.detection_score),
+                (int(self.origin[0, 0] - 5), int(self.origin[1, 0] - 5)),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                font_scale,
+                color,
+                thickness,
+                cv2.FILLED,
+            )
         return image
 
     def __repr__(self):
@@ -52,6 +65,19 @@ class RectangleRegion:
             self.dimensions[1, 0],
             self.detection_score,
         )
+
+    def __str__(self):
+        return "\n\t".join(
+            [
+                "[rectangle]",
+                "origin: ({}, {})".format(self.origin[0, 0], self.origin[1, 0]),
+                "size: ({}, {})".format(self.dimensions[0, 0], self.dimensions[1, 0]),
+                "score: {}".format(self.detection_score),
+            ]
+        )
+
+    def is_empty(self):
+        return np.any(self.dimensions == 0.0)
 
 
 class EllipseRegion:
@@ -89,7 +115,7 @@ class EllipseRegion:
 
         return res
 
-    def draw(self, image, color=(0, 255, 255), thickness=5):
+    def draw(self, image, color=(0, 255, 255), thickness=3):
         return cv2.ellipse(
             image,
             (int(self.center[0, 0]), int(self.center[1, 0])),
@@ -121,4 +147,16 @@ class EllipseRegion:
             self.center[0, 0],
             self.center[1, 0],
             self.detection_score,
+        )
+
+    def __str__(self):
+        return "\n\t".join(
+            [
+                "[ellipse]",
+                "center: ({}, {})".format(self.center[0, 0], self.center[1, 0]),
+                "major_axis_radius: {}".format(self.axis_radius[0, 0]),
+                "minor_axis_radius: {}".format(self.axis_radius[1, 0]),
+                "angle: {}".format(self.angle),
+                "score: {}".format(self.detection_score),
+            ]
         )

@@ -2,14 +2,18 @@ from __future__ import print_function
 
 import sys
 import os
-
+import logging.config
 import yaml
 
 from face_recognition_ros.utils import files
 
 CONFIG_PATH = os.path.join(files.PROJECT_ROOT, "cfg")
 DEFAULT_CFG = "test_cpu_fast.yaml"
+LOGGING_CONFIG = os.path.join(files.PROJECT_ROOT, "cfg", "logging.yaml")
 CONFIG = {}
+
+with open(LOGGING_CONFIG) as conf:
+    logging.config.dictConfig(yaml.safe_load(conf))
 
 
 def load_config(cfg=DEFAULT_CFG):

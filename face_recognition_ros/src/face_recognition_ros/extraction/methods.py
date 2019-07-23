@@ -4,87 +4,16 @@ from face_recognition_ros.extraction import region
 from face_recognition_ros.utils.math import dist, solve_line_intersect
 
 
-def openpose_face_detector(posePtr, threshold):
-    # TODO: Divide face size in v_size and h_size
-    point_top_left = np.zeros(2)
-    face_size = 0.0
-    score = 0.0
-
-    neckScoreAbove = posePtr[1, 2] > threshold
-    headNoseScoreAbove = posePtr[0, 2] > threshold
-    lEarScoreAbove = posePtr[16, 2] > threshold
-    rEarScoreAbove = posePtr[17, 2] > threshold
-    lEyeScoreAbove = posePtr[14, 2] > threshold
-    rEyeScoreAbove = posePtr[15, 2] > threshold
-
-    counter = 0.0
-
-    if neckScoreAbove and headNoseScoreAbove:
-        if (
-            lEyeScoreAbove == lEarScoreAbove
-            and rEyeScoreAbove == rEarScoreAbove
-            and lEyeScoreAbove != rEyeScoreAbove
-        ):
-            if lEyeScoreAbove:
-                point_top_left += (
-                    posePtr[14, 0:2] + posePtr[16, 0:2] + posePtr[0, 0:2]
-                ) / 3.0
-                face_size += 0.85 * (
-                    dist(posePtr[14, 0:2], posePtr[16, 0:2])
-                    + dist(posePtr[0, 0:2], posePtr[16, 0:2])
-                    + dist(posePtr[14, 0:2], posePtr[0, 0:2])
-                )
-                score = max([score, posePtr[14, 2], posePtr[16, 2], posePtr[0, 2]])
-            else:
-                point_top_left += (
-                    posePtr[15, 0:2] + posePtr[17, 0:2] + posePtr[0, 0:2]
-                ) / 3.0
-                face_size += 0.85 * (
-                    dist(posePtr[15, 0:2], posePtr[17, 0:2])
-                    + dist(posePtr[0, 0:2], posePtr[17, 0:2])
-                    + dist(posePtr[15, 0:2], posePtr[0, 0:2])
-                )
-                score = max([score, posePtr[15, 2], posePtr[17, 2], posePtr[0, 2]])
-        else:
-            point_top_left += (posePtr[1, 0:2] + posePtr[0, 0:2]) / 2.0
-            face_size += 2.0 * dist(posePtr[1, 0:2], posePtr[0, 0:2])
-            score = max([score, posePtr[1, 2], posePtr[0, 2]])
-
-        counter += 1.0
-
-    if lEyeScoreAbove and rEyeScoreAbove:
-        point_top_left += (posePtr[14, 0:2] + posePtr[15, 0:2]) / 2.0
-        face_size += 3.0 * dist(posePtr[14, 0:2], posePtr[15, 0:2])
-        counter += 1.0
-        score = max(score, posePtr[14, 2], posePtr[15, 2])
-
-    if lEarScoreAbove and rEarScoreAbove:
-        point_top_left += (posePtr[16, 0:2] + posePtr[17, 0:2]) / 2.0
-        face_size += 2.0 * dist(posePtr[16, 0:2], posePtr[17, 0:2])
-        counter += 1.0
-        score = max([score, posePtr[16, 2], posePtr[17, 2]])
-
-    if counter > 0:
-        point_top_left /= counter
-        face_size /= counter
-
-    return region.RectangleRegion(
-        point_top_left[0, 0],
-        point_top_left[1, 0],
-        face_size[0, 0],
-        face_size[1, 0],
-        score
-    )
-
-
 # DONE: Separate different types
 # DONE: Extract info of which pose correspond to which box
 # TODO: Modify to return EllipseRegion
 # TODO: Keypoints are reversed sometimes (RL or LR)
 # TODO: Missing side face extraction (1 eye missing)
-# TODO: Incorporate ideas from https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/src/openpose/face/faceDetector.cpp
 # DONE: Frontal face (Both sides available)
 # DONE: Partial side face (Both eyes available)
+# TODO: Set minimum size
+# TODO: Output area only within image
+
 
 def oriented_face_detector(p, confidence_threshold):
     pres = p[:, 2] > confidence_threshold
@@ -150,3 +79,86 @@ def oriented_face_detector(p, confidence_threshold):
         pass
 
     return bb
+
+
+# TODO: Incorporate ideas from https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/src/openpose/face/faceDetector.cpp
+def oriented_face_detector_2(posePtr, threshold):
+    major_axis_radius = 0.0  # Face height
+    minor_axis_radius = 0.0  # Face width
+    angle = 0.0
+    center = np.zeros((2, 1))
+    detection_score = np.mean(posePtr[[0, 1, 14, 15, 16, 17], 2])
+
+    neckScoreAbove = posePtr[1, 2] > threshold
+    headNoseScoreAbove = posePtr[0, 2] > threshold
+    lEarScoreAbove = posePtr[16, 2] > threshold
+    rEarScoreAbove = posePtr[17, 2] > threshold
+    lEyeScoreAbove = posePtr[14, 2] > threshold
+    rEyeScoreAbove = posePtr[15, 2] > threshold
+
+    counter = 0.0
+
+    if lEyeScoreAbove and rEyeScoreAbove:
+        # TODO Condition: Both eyes present
+        center += (posePtr[14, 0:2] + posePtr[15, 0:2]) / 2.0
+        diff = posePtr[15, 0:2] - posePtr[14, 0:2]
+        angle += np.arctan2(diff[14, 0], diff[15, 0])
+        minor_axis_radius += 3.0 * dist(posePtr[14, 0:2], posePtr[15, 0:2])
+        pass
+
+    if lEarScoreAbove and rEarScoreAbove:
+        # TODO Condition: Both ears present
+        center += (posePtr[16, 0:2] + posePtr[17, 0:2]) / 2.0
+        diff = posePtr[17, 0:2] - posePtr[16, 0:2]
+        angle += np.arctan2(diff[16, 0], diff[17, 0])
+        minor_axis_radius += 2.0 * dist(posePtr[16, 0:2], posePtr[17, 0:2])
+        pass
+
+    if neckScoreAbove and headNoseScoreAbove:
+        if (
+            lEyeScoreAbove == lEarScoreAbove
+            and rEyeScoreAbove == rEarScoreAbove
+            and lEyeScoreAbove != rEyeScoreAbove
+        ):
+            # Condition: One side missing
+            if lEyeScoreAbove:
+                # Condition: Left side only
+                center += (posePtr[14, 0:2] + posePtr[16, 0:2] + posePtr[0, 0:2]) / 3.0
+
+                diff = posePtr[16, 0:2] - posePtr[14, 0:2]
+                angle += 0.0  # TODO
+
+                width = dist(posePtr[16, 0:2], posePtr[14, 0:2])
+                minor_axis_radius += width
+                # major_axis_radius += 0.0 * width
+            else:
+                # Condition: Right side only
+                center += (posePtr[15, 0:2] + posePtr[17, 0:2] + posePtr[0, 0:2]) / 3.0
+
+                diff = posePtr[15, 0:2] - posePtr[17, 0:2]
+                angle += 0.0  # TODO
+
+                width = dist(posePtr[15, 0:2], posePtr[17, 0:2])
+                minor_axis_radius += width
+                # major_axis_radius += 0.0 * width
+        else:
+            # TODO Condition: None or part of both sides present
+            pass
+
+        counter += 1.0
+
+    if counter > 0:
+        # TODO Fix averaging process
+        center /= counter
+        minor_axis_radius /= counter
+        major_axis_radius /= counter
+        angle /= counter
+
+    return region.EllipseRegion(
+        major_axis_radius,
+        minor_axis_radius,
+        angle,
+        center[0],
+        center[1],
+        detection_score,
+    )

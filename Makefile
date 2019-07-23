@@ -1,3 +1,5 @@
+SRC = face_recognition_ros/src face_recognition_ros/nodes/*
+
 .PHONY: clean clean-pyc clean-build 
 
 clean: clean-build clean-pyc ## remove all build, test, coverage and Python artifacts
@@ -15,8 +17,11 @@ clean-pyc: ## remove Python file artifacts
 	find . -name '*~' -exec rm -f {} +
 	find . -name '__pycache__' -exec rm -fr {} +
 
-#lint: ## check style with flake8
-#	flake8 src/face_recognition_ros
+format:
+	black $(SRC)
+
+lint: ## check style with flake8
+	flake8 $(SRC)
 
 #dist: clean ## builds source and wheel package
 #	python setup.py sdist

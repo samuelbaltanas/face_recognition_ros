@@ -3,9 +3,9 @@ from os import path
 import bisect
 
 import numpy as np
+import cv2
 
 from face_recognition_ros import encoding
-from face_recognition_ros.utils import files
 
 
 class FaceDatabase:
@@ -32,7 +32,7 @@ class FaceDatabase:
         self.embeddings = np.empty((0, 512))  # type: np.ndarray
 
     def add_identity(self, dir, face_enc, label=None):
-        # type: (str, face_encoding.FacialEncoder, str) -> None
+        # type: (str, encoding.FacialEncoder, str) -> None
         """ Add a new entry to our facial recognition database.
 
             It will load at most MAX_IMGS and compute each embedding.
@@ -48,10 +48,13 @@ class FaceDatabase:
         self.labels.append(label)
         self.emb_start.append(self.embeddings.shape[0])
 
-        images = [path.join(dir, i) for i in os.listdir(dir)]
+        images = (path.join(dir, i) for i in os.listdir(dir))
 
-        n_imgs = min(self.MAX_IMGS, len(images))
-        im = encoding.load_images(images[:n_imgs])
+        im = []
+        for i, image in enumerate(images):
+            if i == self.MAX_IMGS:
+                break
+            im.append(cv2.imread(image))
 
         # DONE: Compute embeddings
         emb = face_enc.predict(im)
@@ -59,13 +62,11 @@ class FaceDatabase:
 
     def load(self, dir):
         """ Clear current database and load from files in a directory """
-        self.embeddings = np.load(
-            path.join(dir, "embeddings.npy"), allow_pickle=False
-        )
+        self.embeddings = np.load(path.join(dir, "embeddings.npy"), allow_pickle=False)
 
         self.emb_start = []
         self.labels = []
-        with file(path.join(dir, "id.txt"), mode="r") as f:
+        with open(path.join(dir, "id.txt"), "r") as f:
             for line in f:  # type: str
                 ls = line.split(",")
                 self.labels.append(ls[0])
@@ -73,13 +74,9 @@ class FaceDatabase:
 
     def save(self, dir):
         """ Store current database in a directory """
-        np.save(
-            path.join(dir, "embeddings.npy"),
-            self.embeddings,
-            allow_pickle=False,
-        )
+        np.save(path.join(dir, "embeddings.npy"), self.embeddings, allow_pickle=False)
 
-        with file(path.join(dir, "id.txt"), mode="w") as f:
+        with open(path.join(dir, "id.txt"), "w") as f:
             for label, n in zip(self.labels, self.emb_start):
                 f.write("{},{}\n".format(label, n))
 
