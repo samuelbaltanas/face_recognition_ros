@@ -1,2 +1,5 @@
 # EDITOR
 .vscode/*
+
+*.log
+todolist.md

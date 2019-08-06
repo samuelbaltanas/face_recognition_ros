@@ -1,6 +1,7 @@
 import sys
 from os import path
 
+import numpy as np
 import tensorflow as tf
 
 from face_recognition_ros.utils import files, config
@@ -21,7 +22,7 @@ class FacialEncoder:
 
         # Loading model
         with self.session.as_default():
-            facenet.load_model(files.get_model_path(conf["FACENET"]["model_name"]))
+            facenet.load_model(files.get_model_path("", conf["FACENET"]["model_name"]))
 
         # Tensors
         def_graph = tf.get_default_graph()
@@ -30,13 +31,28 @@ class FacialEncoder:
         self._phase_train_placeholder = def_graph.get_tensor_by_name("phase_train:0")
 
     def predict(self, face_images):
-        # images = map(
-        #    lambda x: image_preprocessing.preprocess_face(x[1]), images
-        # )
+        images = [preprocess_face(face) for face in face_images]
 
         feed_dict = {
-            self._images_placeholder: face_images,
+            self._images_placeholder: images,
             self._phase_train_placeholder: False,
         }
 
         return self.session.run(self._embeddings, feed_dict=feed_dict)
+
+
+def prewhiten(img):
+    mean = np.mean(img)
+    std = np.std(img)
+    std_adj = np.maximum(std, 1.0 / np.sqrt(img.size))
+    y = np.multiply(np.subtract(img, mean), 1 / std_adj)
+    return y
+
+
+def preprocess_face(image, fixed_standardization=True):
+    # Necessary for model 20180402-114759 as explained in:
+    # https://github.com/davidsandberg/facenet/wiki/Training-using-the-VGGFace2-dataset
+    if fixed_standardization:
+        image = (np.float32(image) - 127.5) / 128.0
+    image = prewhiten(image)
+    return image

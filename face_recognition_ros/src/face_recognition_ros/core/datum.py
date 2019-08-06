@@ -1,17 +1,12 @@
 class Datum:
     def __init__(
         self,
-        pose=None,
-        pose_score=0.0,
         face_region=None,
         face_image=None,
         embedding=None,
         identity=None,
         match_score=4.0,
     ):
-        # POSE
-        self.pose = pose
-        self.pose_score = pose_score
         # DETECTION
         self.face_region = face_region
         self.face_image = face_image
@@ -33,3 +28,9 @@ class Datum:
                 "Match score: {}".format(self.match_score),
             ]
         )
+
+    def draw(self, image):
+        if self.face_region is not None:
+            image = self.face_region.draw(image, label=self.identity)
+
+        return image

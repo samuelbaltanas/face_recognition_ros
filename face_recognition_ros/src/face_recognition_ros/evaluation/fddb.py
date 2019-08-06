@@ -11,30 +11,36 @@ import typing
 import cv2
 
 from face_recognition_ros import detection
-from face_recognition_ros.extraction import region
+from face_recognition_ros.core import region
 from face_recognition_ros.utils import config, files
 
-fold_dir = path.expanduser("~/datasets/fddb/FDDB-folds/all_file_path/")
+fold_dir = path.expanduser("~/datasets/fddb/FDDB-folds/")
 image_dir = path.expanduser("~/datasets/fddb/originalPics/")
-out_dir = path.join(files.PROJECT_ROOT, "data/eval/openpose_detection_default")
+out_dir = path.join(files.PROJECT_ROOT, "data/eval/mtcnn_params_detection_default")
 sol_dir = path.expanduser("~/datasets/fddb/FDDB-folds/")
 
-log = logging.getLogger(__name__)
+config.logger_config()
+config.load_config()
+log = logging.getLogger("face_recognition_ros")
 
 
-def main(fold_dir=fold_dir, image_dir=image_dir, out_file=out_dir):
-    config.load_config()
-    detector = detection.FacialDetector()
+def main(
+    detection_method="mtcnn", fold_dir=fold_dir, image_dir=image_dir, out_file=out_dir
+):
+    log.setLevel(logging.DEBUG)
+    if not path.exists(out_dir):
+        os.makedirs(out_dir)
+    detector = detection.FacialDetector(detection_method)
     for im_file, out_fd in fddb_traversal(fold_dir, image_dir, out_dir):
         image = cv2.imread(im_file)
         if image is None:
             raise IOError(errno.ENOENT, os.strerror(errno.ENOENT), im_file)
 
-        faces = detector.extract(image, 0.1)
+        faces, _ = detector.extract_region(image)
         out_fd.write("{}\n".format(len(faces)))
 
         for face in faces:
-            out_fd.write("{}\n".format(repr(face.face_region)))
+            out_fd.write("{}\n".format(repr(face)))
 
 
 def expand_image_path(image_dir, image_file):
@@ -63,7 +69,7 @@ def fddb_solution(sol_dir=sol_dir, image_dir=image_dir):
                 res = []
                 for i in range(num):
                     res.append(parse_region_line(fold.readline()))
-                log.debug("Progression: {}/~2800".format(counter))
+                log.debug("Progression: {}/2844".format(counter))
                 log.debug("Image file: file://{}".format(im_path))
                 yield im_path, res
                 counter += 1

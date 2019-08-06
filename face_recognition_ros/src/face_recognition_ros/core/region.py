@@ -38,17 +38,17 @@ class RectangleRegion:
 
         return res
 
-    def draw(self, image, color=(0, 255, 255), thickness=3, score=False, font_scale=3):
+    def draw(self, image, label="", color=(0, 255, 255), thickness=5, font_scale=4):
         bb = self.to_bounding_box()
         bb = bb.reshape((-1, 1, 2))
         image = cv2.polylines(
             image, np.int64([bb]), isClosed=True, color=color, thickness=thickness
         )
-        if score:
+        if label:
             image = cv2.putText(
                 image,
-                "{0:.2f}".format(self.detection_score),
-                (int(self.origin[0, 0] - 5), int(self.origin[1, 0] - 5)),
+                label,
+                (int(self.origin[0, 0]), int(self.origin[1, 0])),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 font_scale,
                 color,
@@ -78,6 +78,17 @@ class RectangleRegion:
 
     def is_empty(self):
         return np.any(self.dimensions == 0.0)
+
+    def size(self):
+        return self.dimensions[0, 0] * self.dimensions[1, 0]
+
+    def offset(self, img_center):
+        return np.vstack(
+            [
+                self.origin[0, 0] + self.dimensions[0, 0] / 2 - img_center[1],
+                self.origin[1, 0] + self.dimensions[1, 0] / 2 - img_center[0],
+            ]
+        )
 
 
 class EllipseRegion:
@@ -115,8 +126,8 @@ class EllipseRegion:
 
         return res
 
-    def draw(self, image, color=(0, 255, 255), thickness=3):
-        return cv2.ellipse(
+    def draw(self, image, label="", color=(0, 255, 255), thickness=3):
+        image = cv2.ellipse(
             image,
             (int(self.center[0, 0]), int(self.center[1, 0])),
             (int(self.axis_radius[0, 0]), int(self.axis_radius[1, 0])),
@@ -126,6 +137,9 @@ class EllipseRegion:
             color=color,
             thickness=thickness,
         )
+        # TODO: Label
+
+        return image
 
     def extract_face(self, image, shape=None):
         if shape is None:

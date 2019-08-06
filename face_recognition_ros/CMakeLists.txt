@@ -175,6 +175,7 @@ install(PROGRAMS
   scripts/save_embedings
   nodes/dummy_camera_node
   nodes/facial_recognition_node
+  nodes/face_detector_sample
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

@@ -12,8 +12,10 @@ DEFAULT_CFG = "test_cpu_fast.yaml"
 LOGGING_CONFIG = os.path.join(files.PROJECT_ROOT, "cfg", "logging.yaml")
 CONFIG = {}
 
-with open(LOGGING_CONFIG) as conf:
-    logging.config.dictConfig(yaml.safe_load(conf))
+
+def logger_config(conf_path=LOGGING_CONFIG):
+    with open(conf_path) as conf:
+        logging.config.dictConfig(yaml.safe_load(conf))
 
 
 def load_config(cfg=DEFAULT_CFG):
@@ -46,9 +48,8 @@ def _load_from_file(path):
     try:
         with open(FULL_PATH, "r") as f:
             conf = yaml.load(f)
-    except Exception as e:
-        print("[ERR] Configuration file cannot be loaded.", file=sys.stderr)
-        print(e, file=sys.stderr)
+    except Exception:
+        logging.error("Configuration file cannot be loaded.")
         sys.exit(-1)
 
     return conf

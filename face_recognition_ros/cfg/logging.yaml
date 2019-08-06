@@ -8,7 +8,6 @@ formatters:
     ros_fmt:
       format: "[%(name)s][%(levelname)s] %(asctime)s: %(message)s"
 
-
 handlers:
     console:
         class: logging.StreamHandler
@@ -38,13 +37,8 @@ handlers:
         colorize: True
 
 loggers:
-    face_recognition_ros:
-        level: DEBUG
-        handlers: [console, info_file_handler, error_file_handler]
-        propagate: no
-        qualname: face_recognition_ros
     rosout:
-        level: INFO
+        level: DEBUG
         handlers: [rosconsole]
         propagate: yes
         qualname: rosout
@@ -52,4 +46,4 @@ loggers:
 
 root:
     level: DEBUG
-    handlers: [console, info_file_handler, error_file_handler, rosconsole]
+    handlers: [info_file_handler, error_file_handler, rosconsole]

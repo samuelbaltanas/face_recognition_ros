@@ -1,8 +1,17 @@
 import numpy as np
 
 
-def dist(x, y):
-    return np.sqrt(np.sum((x - y) ** 2))
+def dist(x1, x2, func=0):
+    if func == 0:
+        y = np.sqrt(np.sum((x1 - x2) ** 2, axis=1))
+    elif func == 1:
+        dot = np.sum(np.multiply(x1, x2), axis=1)
+        norm = np.linalg.norm(x1, axis=1) * np.linalg.norm(x2, axis=1)
+        similarity = dot / norm
+        y = np.arccos(similarity) / np.pi
+    else:
+        raise RuntimeError("Distance function not defined")
+    return y
 
 
 def rotate(point, angle, origin):
