@@ -1,15 +1,15 @@
 import tensorflow as tf
 
-from align import detect_face
-
 from face_recognition_ros.core import region
 from face_recognition_ros.detectors import base_face_detector
+from face_recognition_ros.third_party import mtcnn_tensorflow, align_mtcnn
+from face_recognition_ros.utils import files
 
 
 class MtcnnFaceDetector(base_face_detector.BaseFaceDetector):
 
     min_size = 50
-    threshold = [0.6, 0.7, 0.7]
+    threshold = [0.6, 0.6, 0.7]
     factor = 0.709
 
     def __init__(self, conf):
@@ -22,11 +22,15 @@ class MtcnnFaceDetector(base_face_detector.BaseFaceDetector):
                     gpu_options=gpu_options, log_device_placement=False
                 )
             )
-            self.pnet, self.rnet, self.onet = detect_face.create_mtcnn(sess, None)
+            self.pnet, self.rnet, self.onet = mtcnn_tensorflow.create_mtcnn(
+                sess, files.PROJECT_ROOT + "/data/models/mtcnn_tensorflow"
+            )
 
-    def extract_region(self, image, threshold=0.8):
+    def extract_region(
+        self, image, threshold=0.0  # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    ):
 
-        bbs, _ = detect_face.detect_face(
+        bbs, points = mtcnn_tensorflow.detect_face(
             image,
             self.min_size,
             self.pnet,
@@ -42,4 +46,23 @@ class MtcnnFaceDetector(base_face_detector.BaseFaceDetector):
             if bb[4] >= threshold
         ]
 
-        return regions, bbs
+        return regions, (bbs, points)
+
+    def extract_images(self, image, regions=None, raw_detection=None, align=True):
+        if raw_detection is None:
+            regions, raw_detection = self.extract_region(image, 0)
+
+        if not align:
+            return super(MtcnnFaceDetector, self).extract_images(
+                image, regions, raw_detection
+            )
+        else:
+            bbox, points = raw_detection
+
+            res = []
+            for idx, box in enumerate(bbox):
+                point = points[:, idx].reshape((2, 5)).T
+                aligned = align_mtcnn.align(image, box, point, image_size="112,112")
+                res.append(aligned)
+
+            return res

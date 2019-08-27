@@ -61,6 +61,6 @@ def create_svm_classifier(pandas_picke, out_dir):
 
 if __name__ == "__main__":
     create_svm_classifier(
-        "/home/sam/UMA/4/4_2/3-TFG/3-Workspace/face_recognition_ros/face_recognition_ros/data/database/family_dataset/database.pkl",
+        "/home/sam/UMA/4/4_2/3-TFG/3-Workspace/face_recognition_ros/face_recognition_ros/data/database/family_dataset/dataset_ark.pkl",
         "/home/sam/UMA/4/4_2/3-TFG/3-Workspace/face_recognition_ros/face_recognition_ros/data/database/family_svm",
     )

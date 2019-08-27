@@ -41,7 +41,6 @@ from face_recognition_ros.utils import config
 config.load_config()
 
 
-# TODO: Create datasets using various detectors and running eval from sandberg
 def create_dataset_mtcnn(args):
     sleep(random.random())
     output_dir = os.path.expanduser(args.output_dir)
@@ -54,7 +53,7 @@ def create_dataset_mtcnn(args):
 
     print("Loading detector")
 
-    # TODO: Create and choose detector
+    # Create and choose detector
     detector = detection.FacialDetector(args.method)
 
     # Add a random key to the filename to allow alignment using multiple processes
@@ -80,7 +79,7 @@ def create_dataset_mtcnn(args):
                 output_filename = os.path.join(output_class_dir, filename + ".png")
                 print(image_path)
                 if not os.path.exists(output_filename):
-                    # TODO: Load images
+                    # Load images
                     try:
                         img = misc.imread(image_path)
                     except (IOError, ValueError, IndexError) as e:
@@ -200,7 +199,6 @@ if __name__ == "__main__":
     create_dataset_mtcnn(parse_arguments(sys.argv[1:]))
 
 
-# TODO: Use generators
 def get_flw_sample_path(flw_path, person, img=None):
     if not isinstance(person, list):
         person = [person]

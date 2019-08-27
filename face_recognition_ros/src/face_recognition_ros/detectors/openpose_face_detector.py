@@ -3,7 +3,6 @@
 """
 
 import sys
-import logging
 
 import numpy as np
 from scipy.spatial.distance import euclidean as dist
@@ -18,7 +17,7 @@ from face_recognition_ros.detectors import base_face_detector
 
 from openpose import pyopenpose as op  # noqa: E402
 
-threshold = 0.5
+threshold = 0.15
 
 
 # DONE: Change interface
@@ -39,8 +38,10 @@ class FacialDetector(base_face_detector.BaseFaceDetector):
             sys.exit(-1)
         else:
             regions = [
-                openpose_face_detector(pose, threshold) for pose in datum.poseKeypoints
+                openpose_face_detector2(pose, threshold) for pose in datum.poseKeypoints
             ]
+
+            regions = [reg for reg in regions if not np.any(reg.dimensions == 0)]
 
         return regions, datum
 
@@ -48,7 +49,9 @@ class FacialDetector(base_face_detector.BaseFaceDetector):
 def openpose_face_detector(posePtr, threshold):
     point_top_left = np.zeros(2)
     face_size = 0.0
-    score = np.mean(posePtr[[0, 1, 14, 15, 16, 17], 2])
+    score = 0.0
+
+    points_used = set()
 
     neckScoreAbove = posePtr[1, 2] > threshold
     headNoseScoreAbove = posePtr[0, 2] > threshold
@@ -74,6 +77,7 @@ def openpose_face_detector(posePtr, threshold):
                     + dist(posePtr[0, 0:2], posePtr[16, 0:2])
                     + dist(posePtr[14, 0:2], posePtr[0, 0:2])
                 )
+                points_used = points_used.union([0, 14, 16])
             else:
                 point_top_left += (
                     posePtr[15, 0:2] + posePtr[17, 0:2] + posePtr[0, 0:2]
@@ -83,9 +87,12 @@ def openpose_face_detector(posePtr, threshold):
                     + dist(posePtr[0, 0:2], posePtr[17, 0:2])
                     + dist(posePtr[15, 0:2], posePtr[0, 0:2])
                 )
+                points_used = points_used.union([0, 15, 17])
+
         else:
             point_top_left += (posePtr[1, 0:2] + posePtr[0, 0:2]) / 2.0
             face_size += 2.0 * dist(posePtr[1, 0:2], posePtr[0, 0:2])
+            points_used = points_used.union([0, 1])
 
         counter += 1.0
 
@@ -93,15 +100,18 @@ def openpose_face_detector(posePtr, threshold):
         point_top_left += (posePtr[14, 0:2] + posePtr[15, 0:2]) / 2.0
         face_size += 3.0 * dist(posePtr[14, 0:2], posePtr[15, 0:2])
         counter += 1.0
+        points_used = points_used.union([14, 15])
 
     if lEarScoreAbove and rEarScoreAbove:
         point_top_left += (posePtr[16, 0:2] + posePtr[17, 0:2]) / 2.0
         face_size += 2.0 * dist(posePtr[16, 0:2], posePtr[17, 0:2])
         counter += 1.0
+        points_used = points_used.union([16, 17])
 
     if counter > 0:
         point_top_left /= counter
         face_size /= counter
+        score = np.mean(posePtr[list(points_used), 2])
 
     return region.RectangleRegion(
         point_top_left[0] - face_size / 2,
@@ -117,6 +127,9 @@ def openpose_face_detector2(posePtr, threshold):
     face_size = [0.0, 0.0]  # (width, height)
     score = np.mean(posePtr[[0, 1, 14, 15, 16, 17], 2])
 
+    l_true = None
+    r_true = None
+
     neckScoreAbove = posePtr[1, 2] > threshold
     headNoseScoreAbove = posePtr[0, 2] > threshold
     lEarScoreAbove = posePtr[16, 2] > threshold
@@ -124,9 +137,18 @@ def openpose_face_detector2(posePtr, threshold):
     lEyeScoreAbove = posePtr[14, 2] > threshold
     rEyeScoreAbove = posePtr[15, 2] > threshold
 
+    counter = 0.2
+
+    # Leftmost point
+    if lEarScoreAbove:
+        l_true = posePtr[16, 0:2]
+    # Rightmost point
+    if rEarScoreAbove:
+        r_true = posePtr[17, 0:2]
+
     counter = 0.0
 
-    if neckScoreAbove and headNoseScoreAbove:
+    if headNoseScoreAbove:
         if (
             lEyeScoreAbove == lEarScoreAbove
             and rEyeScoreAbove == rEarScoreAbove
@@ -141,8 +163,9 @@ def openpose_face_detector2(posePtr, threshold):
                     + dist(posePtr[0, 0:2], posePtr[16, 0:2])
                     + dist(posePtr[14, 0:2], posePtr[0, 0:2])
                 )
-                face_size[0] += dist(posePtr[14, 0:2], posePtr[16, 0:2]) + dist(
-                    posePtr[0, 0:2], posePtr[16, 0:2]
+                face_size[0] += 0.85 * (
+                    dist(posePtr[14, 0:2], posePtr[16, 0:2])
+                    + dist(posePtr[0, 0:2], posePtr[14, 0:2])
                 )
             else:
                 point_top_left += (
@@ -153,25 +176,26 @@ def openpose_face_detector2(posePtr, threshold):
                     + dist(posePtr[0, 0:2], posePtr[17, 0:2])
                     + dist(posePtr[15, 0:2], posePtr[0, 0:2])
                 )
-                face_size[0] += dist(posePtr[15, 0:2], posePtr[17, 0:2]) + dist(
-                    posePtr[0, 0:2], posePtr[17, 0:2]
+                face_size[0] += 0.85 * (
+                    dist(posePtr[15, 0:2], posePtr[17, 0:2])
+                    + dist(posePtr[0, 0:2], posePtr[15, 0:2])
                 )
-        else:
-            point_top_left += (posePtr[1, 0:2] + posePtr[0, 0:2]) / 2.0
-            face_size[1] += 2.0 * dist(posePtr[1, 0:2], posePtr[0, 0:2])
-            face_size[0] += dist(posePtr[1, 0:2], posePtr[0, 0:2])
-
-        counter += 1.0
+            counter += 1.0
+        elif neckScoreAbove:
+            point_top_left += posePtr[0, 0:2]
+            face_size[1] += 1.0 * dist(posePtr[1, 0:2], posePtr[0, 0:2])
+            face_size[0] += 0.0 * dist(posePtr[1, 0:2], posePtr[0, 0:2])
+            counter += 1.0
 
     if lEyeScoreAbove and rEyeScoreAbove:
         point_top_left += (posePtr[14, 0:2] + posePtr[15, 0:2]) / 2.0
-        face_size[1] += 3.0 * dist(posePtr[14, 0:2], posePtr[15, 0:2])
-        face_size[0] += 2.0 * dist(posePtr[14, 0:2], posePtr[15, 0:2])
+        face_size[1] += 4.0 * dist(posePtr[14, 0:2], posePtr[15, 0:2])
+        face_size[0] += 3.0 * dist(posePtr[14, 0:2], posePtr[15, 0:2])
         counter += 1.0
 
     if lEarScoreAbove and rEarScoreAbove:
         point_top_left += (posePtr[16, 0:2] + posePtr[17, 0:2]) / 2.0
-        face_size[1] += 2.0 * dist(posePtr[16, 0:2], posePtr[17, 0:2])
+        face_size[1] += 1.2 * dist(posePtr[16, 0:2], posePtr[17, 0:2])
         face_size[0] += dist(posePtr[16, 0:2], posePtr[17, 0:2])
         counter += 1.0
 
@@ -180,10 +204,16 @@ def openpose_face_detector2(posePtr, threshold):
         face_size[0] /= counter
         face_size[1] /= counter
 
+    if l_true is not None:
+        ll = l_true[0]
+        face_size[0] = face_size[0] - (ll - (point_top_left[0] - face_size[0] / 2))
+    else:
+        ll = point_top_left[0] - face_size[0] / 2
+    #
+    if r_true is not None:
+        rr = r_true[0]
+        face_size[0] = rr - ll
+
     return region.RectangleRegion(
-        point_top_left[0] - face_size[0] / 2,
-        point_top_left[1] - face_size[1] / 2,
-        face_size[0],
-        face_size[1],
-        score,
+        ll, point_top_left[1] - face_size[1] / 2, face_size[0], face_size[1], score
     )

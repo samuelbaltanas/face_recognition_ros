@@ -4,7 +4,7 @@ import logging
 import cv2
 import pandas as pd
 
-from face_recognition_ros import detection, encoding
+from face_recognition_ros import detection, encoding_arc
 from face_recognition_ros.utils import config, files
 
 
@@ -19,7 +19,7 @@ def create_faces_dataset(in_dir, out_dir=None, out_file="database.pkl"):
     config.load_config()
     config.logger_config()
     det = detection.FacialDetector()
-    enc = encoding.FacialEncoder()
+    enc = encoding_arc.EncodingArc()
 
     labels = []
     embeddigs = []
@@ -31,7 +31,7 @@ def create_faces_dataset(in_dir, out_dir=None, out_file="database.pkl"):
             if image is None:
                 continue
             try:
-                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
                 faces = det.extract_images(image)
                 embedding = enc.predict(faces)
                 if embedding.shape[0] > 1:
@@ -46,13 +46,16 @@ def create_faces_dataset(in_dir, out_dir=None, out_file="database.pkl"):
             else:
                 logging.debug("Image added: {}".format(file_name))
                 labels.append(label)
-                embeddigs.append(embedding)
+                embeddigs.append(embedding[0])
     df = pd.DataFrame({"identities": labels, "embeddings": embeddigs})
-
-    df.to_pickle(os.path.join(out_dir, out_file))
+    
+    out_path = os.path.join(out_dir, out_file)
+    df.to_pickle(out_path)
+    logging.info("Face embeddings saved to {}".format(out_path))
 
 
 if __name__ == "__main__":
     create_faces_dataset(
-        "/home/sam/UMA/4/4_2/3-TFG/3-Workspace/face_recognition_ros/face_recognition_ros/data/database/family_dataset"
+        "/home/sam/UMA/4/4_2/3-TFG/3-Workspace/face_recognition_ros/face_recognition_ros/data/database/family_dataset",
+        out_file="dataset_ark_mobile.pkl",
     )

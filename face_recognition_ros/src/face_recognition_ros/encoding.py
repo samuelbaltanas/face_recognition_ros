@@ -1,14 +1,8 @@
-import sys
-from os import path
-
 import numpy as np
 import tensorflow as tf
 
 from face_recognition_ros.utils import files, config
-
-
-sys.path.append(path.join(files.PROJECT_ROOT, "../facenet/src"))
-import facenet  # noqa: E402
+from face_recognition_ros.third_party import facenet
 
 
 class FacialEncoder:
@@ -49,10 +43,9 @@ def prewhiten(img):
     return y
 
 
-def preprocess_face(image, fixed_standardization=True):
+def preprocess_face(image):
     # Necessary for model 20180402-114759 as explained in:
     # https://github.com/davidsandberg/facenet/wiki/Training-using-the-VGGFace2-dataset
-    if fixed_standardization:
-        image = (np.float32(image) - 127.5) / 128.0
-    image = prewhiten(image)
+    image = (np.float32(image) - 127.5) / 128.0
+    #image = prewhiten(image)
     return image

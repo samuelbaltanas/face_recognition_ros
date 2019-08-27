@@ -16,7 +16,7 @@ from face_recognition_ros.utils import config, files
 
 fold_dir = path.expanduser("~/datasets/fddb/FDDB-folds/")
 image_dir = path.expanduser("~/datasets/fddb/originalPics/")
-out_dir = path.join(files.PROJECT_ROOT, "data/eval/mtcnn_params_detection_default")
+out_dir = path.join(files.PROJECT_ROOT, "data/eval/mtcnn_tensorflow")
 sol_dir = path.expanduser("~/datasets/fddb/FDDB-folds/")
 
 config.logger_config()

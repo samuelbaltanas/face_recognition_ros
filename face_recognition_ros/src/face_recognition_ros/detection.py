@@ -3,6 +3,7 @@ from face_recognition_ros.utils import config
 from face_recognition_ros.detectors import (
     dlib_face_detector,
     mtcnn_face_detector,
+    mtcnn_mxnet_detector,
     opencv_face_detector,
     openpose_face_detector,
 )
@@ -11,6 +12,7 @@ from face_recognition_ros.detectors import (
 METHODS = {
     "dlib": dlib_face_detector.DlibDetector,
     "mtcnn": mtcnn_face_detector.MtcnnFaceDetector,
+    # "mtcnn": mtcnn_mxnet_detector.MtcnnMxnetDetector,
     "openpose": openpose_face_detector.FacialDetector,
     "opencv": opencv_face_detector.OpencvFaceDetector,
 }

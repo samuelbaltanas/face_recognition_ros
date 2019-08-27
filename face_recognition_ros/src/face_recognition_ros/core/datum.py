@@ -1,3 +1,10 @@
+import typing
+
+import numpy as np
+
+from face_recognition_ros.core import region
+
+
 class Datum:
     def __init__(
         self,
@@ -8,13 +15,13 @@ class Datum:
         match_score=4.0,
     ):
         # DETECTION
-        self.face_region = face_region
-        self.face_image = face_image
+        self.face_region = face_region  # type: typing.Optional[region.Region]
+        self.face_image = face_image  # type: typing.Optional[np.ndarray]
         # RECOGNITION
-        self.embedding = embedding
+        self.embedding = embedding  # type: typing.Optional[np.ndarray]
         # MATCHING
-        self.identity = identity
-        self.match_score = match_score
+        self.identity = identity  # type: typing.Optional[str]
+        self.match_score = match_score  # type: float
 
     def __str__(self):
         return "\n".join(
@@ -30,6 +37,7 @@ class Datum:
         )
 
     def draw(self, image):
+        # type: (np.ndarray) -> np.ndarray
         if self.face_region is not None:
             image = self.face_region.draw(image, label=self.identity)
 

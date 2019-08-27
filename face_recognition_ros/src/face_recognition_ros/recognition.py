@@ -1,4 +1,4 @@
-from face_recognition_ros import encoding, detection
+from face_recognition_ros import encoding, encoding_arc, detection
 from face_recognition_ros.core import datum
 from face_recognition_ros.classifiers import default, svm, knn
 
@@ -6,7 +6,9 @@ from face_recognition_ros.classifiers import default, svm, knn
 class Recognition:
     def __init__(self, config=None):
         self.detector = detection.FacialDetector(config)
-        self.encoder = encoding.FacialEncoder(config)
+
+        # self.encoder = encoding.FacialEncoder(config)
+        self.encoder = encoding_arc.EncodingArc(config)
 
         self.matcher = default.FaceMatcher(config)
         # self.matcher = svm.SVMMatcher(config)
