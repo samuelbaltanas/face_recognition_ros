@@ -1,0 +1,51 @@
+ROS:
+  camera_topic: "/camera"
+  identity_topic: "/face_ids"
+
+STORAGE:
+  database_file: "/home/sam/UMA/4/4_2/3-TFG/3-Workspace/face_recognition_ros/face_recognition_ros/data/database/family_dataset/dataset_ark2.pkl"
+
+FACENET:
+  compare_threshold: 1.1
+  image_size: [160, 160]
+  model_folder: "" # If empty uses default location [PROJECT_ROOT]/data/models
+  model_name: "20180402-114759.pd" # Can load frozen models ([...].pd) or a checkpoint from a directory ([...]/)
+
+DETECTION:
+  method: "mtcnn"
+  opencv:
+    path: "" # If empty uses default location [PROJECT_ROOT]/data/models
+    model: "opencv_face_detector_uint8.pb"
+    config: "opencv_face_detector.pbtxt"
+    threshold: 0.4
+    margin: 44
+  mtcnn:
+    image_size: 160
+    margin: 44
+    gpu_mem_fraction: 1.0
+  openpose:
+    # For additional info see: https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/include/openpose/flags.hpp
+    # Debugging/Other
+    logging_level: 2
+    disable_multi_thread: false
+    profile_speed: 1000
+    # Rendering
+    render_pose: -1
+    # OpenPose
+    model_folder: "/home/sam/UMA/4/4_2/3-TFG/3-Workspace/openpose/models/" # Model path
+    prototxt_path: ""
+    caffemodel_path: ""
+    output_resolution: "-1x-1"
+    num_gpu: -1
+    num_gpu_start: 0
+    keypoint_scale: 0
+    number_people_max: -1
+    maximize_positives: false
+    fps_max: -1.
+    # OpenPose Body Pose
+    body: 1
+    model_pose: "COCO"
+    # net_resolution: "-1x368"
+    net_resolution: "-1x240" # Halved resolution to improve performance (default: -1x368)
+    scale_number: 1
+    scale_gap: 0.25
