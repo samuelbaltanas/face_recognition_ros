@@ -8,7 +8,7 @@ from face_recognition_ros.utils import files
 
 class MtcnnFaceDetector(base_face_detector.BaseFaceDetector):
 
-    min_size = 50
+    min_size = 20
     threshold = [0.6, 0.6, 0.7]
     factor = 0.709
 
@@ -27,7 +27,7 @@ class MtcnnFaceDetector(base_face_detector.BaseFaceDetector):
             )
 
     def extract_region(
-        self, image, threshold=0.0  # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        self, image, threshold=0.9  # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     ):
 
         bbs, points = mtcnn_tensorflow.detect_face(
@@ -48,7 +48,7 @@ class MtcnnFaceDetector(base_face_detector.BaseFaceDetector):
 
         return regions, (bbs, points)
 
-    def extract_images(self, image, regions=None, raw_detection=None, align=True):
+    def extract_images(self, image, regions=None, raw_detection=None, align=False):
         if raw_detection is None:
             regions, raw_detection = self.extract_region(image, 0)
 
@@ -62,7 +62,7 @@ class MtcnnFaceDetector(base_face_detector.BaseFaceDetector):
             res = []
             for idx, box in enumerate(bbox):
                 point = points[:, idx].reshape((2, 5)).T
-                aligned = align_mtcnn.align(image, box, point, image_size="112,112")
+                aligned = align_mtcnn.align(image, box, point, image_size="160,160")
                 res.append(aligned)
 
             return res

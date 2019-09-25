@@ -11,7 +11,7 @@ class MtcnnMxnetDetector(base_face_detector.BaseFaceDetector):
             model_folder=files.PROJECT_ROOT + "/data/models/mtcnn-mxnet"
         )
 
-    def extract_region(self, image, threshold=0.0):
+    def extract_region(self, image, threshold=0.95):
         ret = self.detector.detect_face(image)
 
         if ret is None:

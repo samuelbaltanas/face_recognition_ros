@@ -11,8 +11,8 @@ from face_recognition_ros.detectors import (
 
 METHODS = {
     "dlib": dlib_face_detector.DlibDetector,
-    "mtcnn": mtcnn_face_detector.MtcnnFaceDetector,
-    # "mtcnn": mtcnn_mxnet_detector.MtcnnMxnetDetector,
+    #"mtcnn": mtcnn_face_detector.MtcnnFaceDetector,
+    "mtcnn": mtcnn_mxnet_detector.MtcnnMxnetDetector,
     "openpose": openpose_face_detector.FacialDetector,
     "opencv": opencv_face_detector.OpencvFaceDetector,
 }
@@ -33,14 +33,14 @@ class FacialDetector:
 
         self.detector = METHODS[method](method_conf)
 
-    def extract_region(self, image):
-        return self.detector.extract_region(image)
+    def extract_region(self, image, threshold=0.9):
+        return self.detector.extract_region(image, threshold)
 
-    def extract_images(self, image, regions=None, raw_detection=None):
-        return self.detector.extract_images(image, regions, raw_detection)
+    def extract_images(self, image, regions=None, raw_detection=None, threshold=0.9):
+        return self.detector.extract_images(image, regions, raw_detection, threshold)
 
-    def extract_datum(self, image):
-        regions, raw_detection = self.detector.extract_region(image)
+    def extract_datum(self, image, threshold=0.9):
+        regions, raw_detection = self.detector.extract_region(image, threshold)
         images = self.detector.extract_images(image, regions, raw_detection)
 
         data = [

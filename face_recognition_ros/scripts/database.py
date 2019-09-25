@@ -56,6 +56,6 @@ def create_faces_dataset(in_dir, out_dir=None, out_file="database.pkl"):
 
 if __name__ == "__main__":
     create_faces_dataset(
-        "/home/sam/UMA/4/4_2/3-TFG/3-Workspace/face_recognition_ros/face_recognition_ros/data/database/family_dataset",
-        out_file="dataset_ark_mobile.pkl",
+        "/home/sam/UMA/4/4_2/3-TFG/3-Workspace/face_recognition_ros/face_recognition_ros/data/database/labo_dataset/",
+        out_file="lab.pkl",
     )

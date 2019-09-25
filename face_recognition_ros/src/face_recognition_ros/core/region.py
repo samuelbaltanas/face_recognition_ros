@@ -41,9 +41,13 @@ class RectangleRegion:
 
         return res
 
-    def draw(self, image, label="", color=(0, 255, 255), thickness=5, font_scale=4):
+    def draw(self, image, label=None, color=(0, 255, 0), thickness=3, font_scale=1):
         bb = self.to_bounding_box()
         bb = bb.reshape((-1, 1, 2))
+
+        if label == '':
+            color = (0, 0, 255)
+
         image = cv2.polylines(
             image, np.int64([bb]), isClosed=True, color=color, thickness=thickness
         )
@@ -51,11 +55,11 @@ class RectangleRegion:
             image = cv2.putText(
                 image,
                 label,
-                (int(self.origin[0, 0]), int(self.origin[1, 0])),
+                (int(self.origin[0, 0]), int(self.origin[1, 0]+self.dimensions[1, 0]+20*font_scale)),
                 fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                 fontScale=font_scale,
                 color=color,
-                # thickness,
+                thickness=thickness*2/3,
                 lineType=cv2.FILLED,
             )
         return image

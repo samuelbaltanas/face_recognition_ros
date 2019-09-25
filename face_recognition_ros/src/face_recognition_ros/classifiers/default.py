@@ -44,9 +44,9 @@ class FaceMatcher:
             logging.info("Id: {} recognized with dist {}".format(label, d))
             return label, d
 
-    def recognize(self, embeding, threshold=1.1):
+    def recognize(self, embeding, threshold=0.4):
         # type: (np.ndarray) -> (str, float)
-        d_list = dist(self.embeddings, embeding, func=0)  # type: np.ndarray
+        d_list = dist(self.embeddings, embeding, func=1)  # type: np.ndarray
 
         idx = d_list.argmin(axis=0)
         d = d_list[idx]

@@ -12,7 +12,7 @@ URL = "rtsp://192.168.1.67:8080/h264_pcm.sdp"
 
 def main():
 
-    ros.init_node("camera")
+    ros.init_node("webcam_node")
 
     config.load_config()
 

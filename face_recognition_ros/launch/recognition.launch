@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <launch>
-  <node pkg="face_recognition_ros" type="webcam_node" name="camera" output="screen"/>
+  <node pkg="face_recognition_ros" type="webcam_node" name="webcam" output="screen"/>
   <node pkg="face_recognition_ros" type="facial_recognition_node" name="face_recognition" output="screen">
  </node>
   <node type="rviz" name="rviz" pkg="rviz"/>

@@ -32,15 +32,19 @@ class EncodingArc:
     def predict(self, face_images):
 
         res = []
-        for face in face_images:
+        for i, face in enumerate(face_images):
             face = cv2.cvtColor(face, cv2.COLOR_BGR2RGB)
             face = np.transpose(face, (2, 0, 1))
-            input_blob = np.expand_dims(face, axis=0)
-            data = mx.nd.array(input_blob)
-            db = mx.io.DataBatch(data=(data,))
-            self.model.forward(db, is_train=False)
-            embedding = self.model.get_outputs()[0].asnumpy()
-            embedding = preprocessing.normalize(embedding).flatten()
-            res.append(embedding)
+            face = np.expand_dims(face, 0)
+            face_images[i] = face
 
-        return np.array(res)
+        input_blob = np.vstack(face_images)
+
+        data = mx.nd.array(input_blob)
+        db = mx.io.DataBatch(data=(data,))
+        self.model.forward(db, is_train=False)
+        embedding = self.model.get_outputs()[0].asnumpy()
+
+        embedding = preprocessing.normalize(embedding, axis=1)
+
+        return embedding

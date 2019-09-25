@@ -36,9 +36,9 @@ class Datum:
             ]
         )
 
-    def draw(self, image):
+    def draw(self, image, **kwargs):
         # type: (np.ndarray) -> np.ndarray
         if self.face_region is not None:
-            image = self.face_region.draw(image, label=self.identity)
+            image = self.face_region.draw(image, label=self.identity, **kwargs)
 
         return image

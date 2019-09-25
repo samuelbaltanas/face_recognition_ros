@@ -7,9 +7,10 @@ import sensor_msgs.msg as sensor_msgs
 import cv_bridge
 
 from face_recognition_ros.utils import config  # noqa: E402
-from face_recognition_ros import recognition  # noqa: E402
+from face_recognition_ros import recognition, core  # noqa: E402
+from face_recognition_ros_msgs import msg as face_msgs
 
-NODE_NAME = "face_recognition"
+NODE_NAME = "face_recognition_node"
 
 
 class RecognitionNode:
@@ -17,8 +18,10 @@ class RecognitionNode:
 
         self.bridge = cv_bridge.CvBridge()
 
-        self.img_pub = ros.Publisher("/detections", sensor_msgs.Image, queue_size=1)
+        self.img_pub = ros.Publisher("/recognition_image", sensor_msgs.Image, queue_size=1)
+        self.list_pub = ros.Publisher("/recognition", face_msgs.IdentityList, queue_size=1)
         self.im_sub = ros.Subscriber("/camera", sensor_msgs.Image, self.imageCallback)
+        # self.im_sub = ros.Subscriber("/usb_cam/image_raw", sensor_msgs.Image, self.imageCallback)
 
         self.face_det = recognition.Recognition()
 
@@ -40,10 +43,22 @@ class RecognitionNode:
                 sys.exit(-1)
 
             faces = self.face_det.recognize(cv_image)
+
+            msg = face_msgs.IdentityList()
+
             for face in faces:
                 cv_image = face.face_region.draw(cv_image, label=face.identity)
 
+                iden = face_msgs.Identity()
+
+                reg = face.face_region  # type: core.region.RectangleRegion
+                iden.bounding_box = [reg.origin[0, 0], reg.origin[1, 0], reg.dimensions[0, 0], reg.dimensions[1, 0]] 
+                iden.person_id = face.identity
+                iden.recognition_score = face.match_score
+                msg.identities.append(iden)
+
             self.img_pub.publish(self.bridge.cv2_to_imgmsg(cv_image, "bgr8"))
+            self.list_pub.publish(msg)
             self.received = False
 
 
