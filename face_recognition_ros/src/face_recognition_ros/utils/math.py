@@ -1,4 +1,5 @@
 import numpy as np
+from sklearn import preprocessing
 
 
 def dist(x1, x2, func=0):
@@ -30,3 +31,19 @@ def solve_line_intersect(p1, p2, a, b):
     d = C[0, 0] * np.vstack(a) + p1
 
     return d.flatten()
+
+
+def compute_centroid(embeddings, labels, func=1):
+    emb = []
+    lab = np.unique(labels)
+
+    for i in lab:
+        is_im = i == labels
+        x1 = embeddings[is_im]
+        x2 = x1.mean(axis=0).reshape(1, -1)
+        if func == 1:
+            x2 = preprocessing.normalize(x2)
+
+        emb.append(x2)
+
+        return np.vstack(emb), lab

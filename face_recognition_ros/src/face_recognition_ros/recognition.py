@@ -7,7 +7,7 @@ class Recognition:
     def __init__(self, config=None):
         self.detector = detection.FacialDetector(config)
 
-        #self.encoder = encoding.FacialEncoder(config)
+        # self.encoder = encoding.FacialEncoder(config)
         self.encoder = encoding_arc.EncodingArc(config)
 
         self.matcher = default.FaceMatcher(config)

@@ -47,5 +47,5 @@ def preprocess_face(image):
     # Necessary for model 20180402-114759 as explained in:
     # https://github.com/davidsandberg/facenet/wiki/Training-using-the-VGGFace2-dataset
     image = (np.float32(image) - 127.5) / 128.0
-    #image = prewhiten(image)
+    # image = prewhiten(image)
     return image

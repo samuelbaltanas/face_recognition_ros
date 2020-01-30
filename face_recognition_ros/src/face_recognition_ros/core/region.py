@@ -41,12 +41,37 @@ class RectangleRegion:
 
         return res
 
+    def to_cvbox(self, margin=0.0):
+        cvbox = [
+            self.origin[0, 0],
+            self.origin[1, 0],
+            self.dimensions[0, 0],
+            self.dimensions[1, 0],
+        ]
+        if margin > 0.0:
+            cvbox[0] -= self.dimensions[0, 0] * margin / 2
+            cvbox[1] -= self.dimensions[1, 0] * margin / 2
+            cvbox[2] += self.dimensions[0, 0] * margin / 2
+            cvbox[3] += self.dimensions[1, 0] * margin / 2
+
+        return tuple(cvbox)
+
+    def intersect(self, x):
+        end1 = self.origin + self.dimensions
+        end2 = x.origin + x.dimensions
+
+        ov = (max(self.origin[0, 0], x.origin[0, 0]) - min(end1[0, 0], end2[0, 0])) * (
+            max(self.origin[1, 0], x.origin[1, 0]) - min(end1[1, 0], end2[1, 0])
+        )
+
+        return ov / (self.size() + x.size() - ov)
+
     def draw(self, image, label=None, color=(0, 255, 0), thickness=3, font_scale=1):
         bb = self.to_bounding_box()
         bb = bb.reshape((-1, 1, 2))
 
-        if label == '':
-            color = (0, 0, 255)
+        if label is None or label == "":
+            color = (255, 0, 0)
 
         image = cv2.polylines(
             image, np.int64([bb]), isClosed=True, color=color, thickness=thickness
@@ -55,11 +80,14 @@ class RectangleRegion:
             image = cv2.putText(
                 image,
                 label,
-                (int(self.origin[0, 0]), int(self.origin[1, 0]+self.dimensions[1, 0]+20*font_scale)),
+                (
+                    int(self.origin[0, 0]),
+                    int(self.origin[1, 0] + self.dimensions[1, 0] + 30 * font_scale),
+                ),
                 fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                 fontScale=font_scale,
                 color=color,
-                thickness=thickness*2/3,
+                thickness=int(thickness * 2 / 3),
                 lineType=cv2.FILLED,
             )
         return image

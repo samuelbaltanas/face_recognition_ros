@@ -57,9 +57,10 @@ def main(
 
     auc = metrics.auc(fpr, tpr)
     print("Area Under Curve (AUC): %1.3f" % auc)
-    eer = optimize.brentq(lambda x: 1.0 - x - interpolate.interp1d(fpr, tpr)(x), 0.0, 1.0)
+    eer = optimize.brentq(
+        lambda x: 1.0 - x - interpolate.interp1d(fpr, tpr)(x), 0.0, 1.0
+    )
     print("Equal Error Rate (EER): %1.3f" % eer)
-
 
 
 if __name__ == "__main__":

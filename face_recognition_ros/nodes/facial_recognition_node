@@ -18,8 +18,12 @@ class RecognitionNode:
 
         self.bridge = cv_bridge.CvBridge()
 
-        self.img_pub = ros.Publisher("/recognition_image", sensor_msgs.Image, queue_size=1)
-        self.list_pub = ros.Publisher("/recognition", face_msgs.IdentityList, queue_size=1)
+        self.img_pub = ros.Publisher(
+            "/recognition_image", sensor_msgs.Image, queue_size=1
+        )
+        self.list_pub = ros.Publisher(
+            "/recognition", face_msgs.IdentityList, queue_size=1
+        )
         self.im_sub = ros.Subscriber("/camera", sensor_msgs.Image, self.imageCallback)
         # self.im_sub = ros.Subscriber("/usb_cam/image_raw", sensor_msgs.Image, self.imageCallback)
 
@@ -52,7 +56,12 @@ class RecognitionNode:
                 iden = face_msgs.Identity()
 
                 reg = face.face_region  # type: core.region.RectangleRegion
-                iden.bounding_box = [reg.origin[0, 0], reg.origin[1, 0], reg.dimensions[0, 0], reg.dimensions[1, 0]] 
+                iden.bounding_box = [
+                    reg.origin[0, 0],
+                    reg.origin[1, 0],
+                    reg.dimensions[0, 0],
+                    reg.dimensions[1, 0],
+                ]
                 iden.person_id = face.identity
                 iden.recognition_score = face.match_score
                 msg.identities.append(iden)
