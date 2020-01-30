@@ -2,7 +2,7 @@ import typing
 
 import numpy as np
 
-from face_recognition_ros.core import region
+from face_recognition_ros import region
 
 
 class Datum:
@@ -10,6 +10,7 @@ class Datum:
         self,
         face_region=None,
         face_image=None,
+        keypoints=None,
         embedding=None,
         identity=None,
         match_score=4.0,
@@ -17,6 +18,7 @@ class Datum:
         # DETECTION
         self.face_region = face_region  # type: typing.Optional[region.Region]
         self.face_image = face_image  # type: typing.Optional[np.ndarray]
+        self.keypoints = keypoints
         # RECOGNITION
         self.embedding = embedding  # type: typing.Optional[np.ndarray]
         # MATCHING

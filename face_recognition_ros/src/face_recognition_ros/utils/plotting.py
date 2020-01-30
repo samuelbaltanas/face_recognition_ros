@@ -1,5 +1,5 @@
 import numpy as np
-from face_recognition_ros.core import datum
+from face_recognition_ros import datum
 
 
 def draw_all_detections(image, data, **kwargs):

@@ -11,7 +11,7 @@ import typing
 import cv2
 
 from face_recognition_ros import detection
-from face_recognition_ros.core import region
+from face_recognition_ros import region
 from face_recognition_ros.utils import config, files
 
 fold_dir = path.expanduser("~/datasets/fddb/FDDB-folds/")
@@ -25,7 +25,10 @@ log = logging.getLogger("face_recognition_ros")
 
 
 def main(
-    detection_method="mtcnn", fold_dir=fold_dir, image_dir=image_dir, out_file=out_dir
+    detection_method="mtcnn",
+    fold_dir=fold_dir,
+    image_dir=image_dir,
+    out_file=out_dir,
 ):
     log.setLevel(logging.DEBUG)
     if not path.exists(out_dir):

@@ -2,7 +2,6 @@
 from __future__ import print_function
 
 import sys
-import os
 from os import path
 import argparse
 
@@ -12,12 +11,12 @@ from utils import files
 from face_recognition_ros import encoding, matching
 
 sample_people = [
-    'George_W_Bush',
-    'Colin_Powell',
-    'Tony_Blair',
-    'Donald_Rumsfeld',
-    'Gerhard_Schroeder'
-    ]
+    "George_W_Bush",
+    "Colin_Powell",
+    "Tony_Blair",
+    "Donald_Rumsfeld",
+    "Gerhard_Schroeder",
+]
 
 
 def main(argv):
@@ -35,14 +34,19 @@ def main(argv):
 def parse_arguments(argv):
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("-s", "--sample",
-                        action="store_true", default=False,
-                        help="Load sample images in dataset")
-    parser.add_argument("-o", "--output",
-                        required=True, help="Output directory")
-    parser.add_argument("image_dirs",
-                        nargs="*",
-                        help="Directories for each person")
+    parser.add_argument(
+        "-s",
+        "--sample",
+        action="store_true",
+        default=False,
+        help="Load sample images in dataset",
+    )
+    parser.add_argument(
+        "-o", "--output", required=True, help="Output directory"
+    )
+    parser.add_argument(
+        "image_dirs", nargs="*", help="Directories for each person"
+    )
 
     args = parser.parse_args(argv)
 
@@ -51,7 +55,9 @@ def parse_arguments(argv):
             sample_people[idx] = files.get_flw_path(name)
         args.image_dirs = sample_people
     elif len(args.image_dirs) == 0:
-        parser.error("At least 1 image_dirs is necesary when --sample not enabled.")
+        parser.error(
+            "At least 1 image_dirs is necesary when --sample not enabled."
+        )
     else:
         for i in args.image_dirs:
             parser.error("{} is not a directory".format(i))
@@ -60,6 +66,7 @@ def parse_arguments(argv):
         parser.error("{} is not a directory".format(args.output))
 
     return args
+
 
 if __name__ == "__main__":
     argv = parse_arguments(sys.argv[1:])

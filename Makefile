@@ -18,10 +18,10 @@ clean-pyc: ## remove Python file artifacts
 	find . -name '__pycache__' -exec rm -fr {} +
 
 format:
-	black $(SRC)
+	black -l79 .
 
 lint: ## check style with flake8
-	flake8 $(SRC)
+	python3 -m pyflakes .
 
 #dist: clean ## builds source and wheel package
 #	python setup.py sdist

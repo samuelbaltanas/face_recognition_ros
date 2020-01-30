@@ -1,7 +1,6 @@
 import logging
 
 import numpy as np
-import pickle
 import pandas as pd
 
 from face_recognition_ros.utils import config
@@ -14,7 +13,9 @@ class FaceMatcher:
         if conf is None:
             conf = config.CONFIG
         storage_config = conf["STORAGE"]
-        database = pd.read_pickle(storage_config["database_file"])  # type: pd.DataFrame
+        database = pd.read_pickle(
+            storage_config["database_file"]
+        )  # type: pd.DataFrame
         self.labels = database.identities.to_numpy(copy=True, dtype=str)
         self.embeddings = np.vstack(database.embeddings.array)
         del database
@@ -30,10 +31,14 @@ class FaceMatcher:
             m = np.mean(d <= threshold)
 
             if m > 0:
-                logging.debug("Hypothesis [{}] accepted. Distance={}".format(label, m))
+                logging.debug(
+                    "Hypothesis [{}] accepted. Distance={}".format(label, m)
+                )
                 res.append((label, m))
             else:
-                logging.debug("Hypothesis [{}] discarded. Distance={}".format(label, m))
+                logging.debug(
+                    "Hypothesis [{}] discarded. Distance={}".format(label, m)
+                )
 
         if not res:
             logging.debug("Unknown face. Distance={}".format(np.NaN))

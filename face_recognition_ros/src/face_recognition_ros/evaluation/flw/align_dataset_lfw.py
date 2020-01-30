@@ -76,7 +76,9 @@ def create_dataset_mtcnn(args):
             for image_path in cls.image_paths:
                 nrof_images_total += 1
                 filename = os.path.splitext(os.path.split(image_path)[1])[0]
-                output_filename = os.path.join(output_class_dir, filename + ".png")
+                output_filename = os.path.join(
+                    output_class_dir, filename + ".png"
+                )
                 print(image_path)
                 if not os.path.exists(output_filename):
                     # Load images
@@ -99,23 +101,32 @@ def create_dataset_mtcnn(args):
                         nrof_faces = len(regions)
                         if nrof_faces > 0:
                             img_size = np.asarray(img.shape)[0:2]
-                            if nrof_faces > 1 and not args.detect_multiple_faces:
+                            if (
+                                nrof_faces > 1
+                                and not args.detect_multiple_faces
+                            ):
                                 bounding_box_size = np.array(
                                     [r.size() for r in regions]
                                 )
                                 img_center = img_size / 2
                                 offsets = [
-                                    r.offset(img_center).flatten() for r in regions
+                                    r.offset(img_center).flatten()
+                                    for r in regions
                                 ]
-                                offset_dist_squared = np.sum(np.power(offsets, 2.0), 1)
+                                offset_dist_squared = np.sum(
+                                    np.power(offsets, 2.0), 1
+                                )
                                 index = np.argmax(
-                                    bounding_box_size - offset_dist_squared * 2.0
+                                    bounding_box_size
+                                    - offset_dist_squared * 2.0
                                 )  # some extra weight on the centering
                                 regions = [regions[index]]
                                 raw_detection = [raw_detection[index]]
 
                             # Extract images
-                            for i, (reg, raw) in enumerate(zip(regions, raw_detection)):
+                            for i, (reg, raw) in enumerate(
+                                zip(regions, raw_detection)
+                            ):
                                 scaled = detector.extract_images(
                                     img, regions=[reg], raw_detection=[raw]
                                 )[0]
@@ -139,7 +150,9 @@ def create_dataset_mtcnn(args):
                             text_file.write("%s\n" % (output_filename))
 
     print("Total number of images: %d" % nrof_images_total)
-    print("Number of successfully aligned images: %d" % nrof_successfully_aligned)
+    print(
+        "Number of successfully aligned images: %d" % nrof_successfully_aligned
+    )
 
 
 def parse_arguments(argv):
@@ -211,6 +224,8 @@ def get_flw_sample_path(flw_path, person, img=None):
     flw_dir = os.listdir(flw_path)
     person_path = [os.path.join(flw_path, flw_dir[i]) for i in person]
 
-    person_img = [os.path.join(p, os.listdir(p)[i]) for p, i in zip(person_path, img)]
+    person_img = [
+        os.path.join(p, os.listdir(p)[i]) for p, i in zip(person_path, img)
+    ]
 
     return person_img

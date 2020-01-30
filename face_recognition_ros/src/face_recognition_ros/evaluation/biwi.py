@@ -11,7 +11,7 @@ import pandas as pd
 import cv2
 
 from face_recognition_ros import detection, encoding_arc, recognition
-from face_recognition_ros.core import datum
+from face_recognition_ros import datum
 from face_recognition_ros.utils import config
 
 # Default paths to the dataset
@@ -93,7 +93,9 @@ def create_biwi_db(out_path):
         face_match = match_detection(x, (center3D, angle))
         region, (bbox, points) = x
         face = detector.extract_images(
-            image, [region[face_match]], (bbox[[face_match]], points[[face_match]])
+            image,
+            [region[face_match]],
+            (bbox[[face_match]], points[[face_match]]),
         )
         embedding = encoder.predict(face)
 
@@ -176,7 +178,11 @@ def angle_from_matrix(rotation):
     r = rotation.T
 
     roll = -np.arctan2(r[1, 0], r[0][0]) * 180 / np.pi
-    yaw = -np.arctan2(-r[2, 0], np.sqrt(r[2, 1] ** 2 + r[2, 2] ** 2)) * 180 / np.pi
+    yaw = (
+        -np.arctan2(-r[2, 0], np.sqrt(r[2, 1] ** 2 + r[2, 2] ** 2))
+        * 180
+        / np.pi
+    )
     pitch = np.arctan2(r[2, 1], r[2, 2]) * 180 / np.pi
 
     return (roll, pitch, yaw)
@@ -256,11 +262,18 @@ def match_detection(det_regions, ground_truth):
         d_x = region.dimensions[0, 0]
         d_y = region.dimensions[1, 0]
 
-        if pp[0] < og_x or pp[1] < og_y or pp[0] > og_x + d_x or pp[1 > og_y + d_y]:
+        if (
+            pp[0] < og_x
+            or pp[1] < og_y
+            or pp[0] > og_x + d_x
+            or pp[1 > og_y + d_y]
+        ):
             continue
         else:
             center_bb = np.array((og_x + d_x / 2, og_y + d_y / 2))
-            dist = np.sqrt((pp[0] - center_bb[0]) ** 2 + (pp[1] - center_bb[1]) ** 2)
+            dist = np.sqrt(
+                (pp[0] - center_bb[0]) ** 2 + (pp[1] - center_bb[1]) ** 2
+            )
             if dist < best[1]:
                 best = idx, dist
     return best[0]

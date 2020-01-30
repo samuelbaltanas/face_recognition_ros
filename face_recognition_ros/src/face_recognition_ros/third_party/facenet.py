@@ -215,7 +215,9 @@ def train(
         if optimizer == "ADAGRAD":
             opt = tf.train.AdagradOptimizer(learning_rate)
         elif optimizer == "ADADELTA":
-            opt = tf.train.AdadeltaOptimizer(learning_rate, rho=0.9, epsilon=1e-6)
+            opt = tf.train.AdadeltaOptimizer(
+                learning_rate, rho=0.9, epsilon=1e-6
+            )
         elif optimizer == "ADAM":
             opt = tf.train.AdamOptimizer(
                 learning_rate, beta1=0.9, beta2=0.999, epsilon=0.1
@@ -225,7 +227,9 @@ def train(
                 learning_rate, decay=0.9, momentum=0.9, epsilon=1.0
             )
         elif optimizer == "MOM":
-            opt = tf.train.MomentumOptimizer(learning_rate, 0.9, use_nesterov=True)
+            opt = tf.train.MomentumOptimizer(
+                learning_rate, 0.9, use_nesterov=True
+            )
         else:
             raise ValueError("Invalid optimization algorithm")
 
@@ -278,7 +282,9 @@ def crop(image, random_crop, image_size):
         else:
             (h, v) = (0, 0)
         image = image[
-            (sz1 - sz2 + v) : (sz1 + sz2 + v), (sz1 - sz2 + h) : (sz1 + sz2 + h), :
+            (sz1 - sz2 + v) : (sz1 + sz2 + v),
+            (sz1 - sz2 + h) : (sz1 + sz2 + h),
+            :,
         ]
     return image
 
@@ -424,7 +430,10 @@ def split_dataset(dataset, split_ratio, min_nrof_images_per_class, mode):
             split = int(math.floor(nrof_images_in_class * (1 - split_ratio)))
             if split == nrof_images_in_class:
                 split = nrof_images_in_class - 1
-            if split >= min_nrof_images_per_class and nrof_images_in_class - split >= 1:
+            if (
+                split >= min_nrof_images_per_class
+                and nrof_images_in_class - split >= 1
+            ):
                 train_set.append(ImageClass(cls.name, paths[:split]))
                 test_set.append(ImageClass(cls.name, paths[split:]))
     else:
@@ -452,14 +461,18 @@ def load_model(model, input_map=None):
         saver = tf.train.import_meta_graph(
             os.path.join(model_exp, meta_file), input_map=input_map
         )
-        saver.restore(tf.get_default_session(), os.path.join(model_exp, ckpt_file))
+        saver.restore(
+            tf.get_default_session(), os.path.join(model_exp, ckpt_file)
+        )
 
 
 def get_model_filenames(model_dir):
     files = os.listdir(model_dir)
     meta_files = [s for s in files if s.endswith(".meta")]
     if len(meta_files) == 0:
-        raise ValueError("No meta file found in the model directory (%s)" % model_dir)
+        raise ValueError(
+            "No meta file found in the model directory (%s)" % model_dir
+        )
     elif len(meta_files) > 1:
         raise ValueError(
             "There should not be more than one meta file in the model directory (%s)"
@@ -491,7 +504,9 @@ def distance(embeddings1, embeddings2, distance_metric=0):
     elif distance_metric == 1:
         # Distance based on cosine similarity
         dot = np.sum(np.multiply(embeddings1, embeddings2), axis=1)
-        norm = np.linalg.norm(embeddings1, axis=1) * np.linalg.norm(embeddings2, axis=1)
+        norm = np.linalg.norm(embeddings1, axis=1) * np.linalg.norm(
+            embeddings2, axis=1
+        )
         similarity = dot / norm
         dist = np.arccos(similarity) / math.pi
     else:
@@ -524,11 +539,16 @@ def calculate_roc(
     for fold_idx, (train_set, test_set) in enumerate(k_fold.split(indices)):
         if subtract_mean:
             mean = np.mean(
-                np.concatenate([embeddings1[train_set], embeddings2[train_set]]), axis=0
+                np.concatenate(
+                    [embeddings1[train_set], embeddings2[train_set]]
+                ),
+                axis=0,
             )
         else:
             mean = 0.0
-        dist = distance(embeddings1 - mean, embeddings2 - mean, distance_metric)
+        dist = distance(
+            embeddings1 - mean, embeddings2 - mean, distance_metric
+        )
 
         # Find the best threshold for the fold
         acc_train = np.zeros((nrof_thresholds))
@@ -544,7 +564,9 @@ def calculate_roc(
                 threshold, dist[test_set], actual_issame[test_set]
             )
         _, _, accuracy[fold_idx] = calculate_accuracy(
-            thresholds[best_threshold_index], dist[test_set], actual_issame[test_set]
+            thresholds[best_threshold_index],
+            dist[test_set],
+            actual_issame[test_set],
         )
 
         tpr = np.mean(tprs, 0)
@@ -557,7 +579,9 @@ def calculate_accuracy(threshold, dist, actual_issame):
     tp = np.sum(np.logical_and(predict_issame, actual_issame))
     fp = np.sum(np.logical_and(predict_issame, np.logical_not(actual_issame)))
     tn = np.sum(
-        np.logical_and(np.logical_not(predict_issame), np.logical_not(actual_issame))
+        np.logical_and(
+            np.logical_not(predict_issame), np.logical_not(actual_issame)
+        )
     )
     fn = np.sum(np.logical_and(np.logical_not(predict_issame), actual_issame))
 
@@ -591,11 +615,16 @@ def calculate_val(
     for fold_idx, (train_set, test_set) in enumerate(k_fold.split(indices)):
         if subtract_mean:
             mean = np.mean(
-                np.concatenate([embeddings1[train_set], embeddings2[train_set]]), axis=0
+                np.concatenate(
+                    [embeddings1[train_set], embeddings2[train_set]]
+                ),
+                axis=0,
             )
         else:
             mean = 0.0
-        dist = distance(embeddings1 - mean, embeddings2 - mean, distance_metric)
+        dist = distance(
+            embeddings1 - mean, embeddings2 - mean, distance_metric
+        )
 
         # Find the threshold that gives FAR = far_target
         far_train = np.zeros(nrof_thresholds)
@@ -622,7 +651,9 @@ def calculate_val(
 def calculate_val_far(threshold, dist, actual_issame):
     predict_issame = np.less(dist, threshold)
     true_accept = np.sum(np.logical_and(predict_issame, actual_issame))
-    false_accept = np.sum(np.logical_and(predict_issame, np.logical_not(actual_issame)))
+    false_accept = np.sum(
+        np.logical_and(predict_issame, np.logical_not(actual_issame))
+    )
     n_same = np.sum(actual_issame)
     n_diff = np.sum(np.logical_not(actual_issame))
     val = float(true_accept) / float(n_same)
@@ -682,9 +713,9 @@ def put_images_on_grid(images, shape=(16, 8)):
             if img_index >= nrof_images:
                 break
             y_start = j * (img_size + bw) + bw
-            img[x_start : x_start + img_size, y_start : y_start + img_size, :] = images[
-                img_index, :, :, :
-            ]
+            img[
+                x_start : x_start + img_size, y_start : y_start + img_size, :
+            ] = images[img_index, :, :, :]
         if img_index >= nrof_images:
             break
     return img

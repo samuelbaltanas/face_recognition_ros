@@ -48,7 +48,9 @@ def create_knn_classifier(pandas_pickle, out_dir):
     X = X / np.linalg.norm(X, axis=1)[:, None]
     Y = lab_enc.transform(df.identities)
 
-    clf = neighbors.KNeighborsClassifier(5)  # "cosine")  # , weights="distance")
+    clf = neighbors.KNeighborsClassifier(
+        5
+    )  # "cosine")  # , weights="distance")
     clf.fit(X, Y)
 
     with open(os.path.join(out_dir, "classifier.pickle"), "w") as f:

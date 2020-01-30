@@ -1,6 +1,9 @@
-from face_recognition_ros.core import datum
+from face_recognition_ros import datum
 from face_recognition_ros.utils import config
-from face_recognition_ros.detectors import mtcnn_mxnet_detector, opencv_face_detector
+from face_recognition_ros.detectors import (
+    mtcnn_mxnet_detector,
+    opencv_face_detector,
+)
 
 # mtcnn_face_detector,
 # dlib_face_detector,
@@ -33,8 +36,12 @@ class FacialDetector:
     def extract_region(self, image, threshold=0.9):
         return self.detector.extract_region(image, threshold)
 
-    def extract_images(self, image, regions=None, raw_detection=None, threshold=0.9):
-        return self.detector.extract_images(image, regions, raw_detection, threshold)
+    def extract_images(
+        self, image, regions=None, raw_detection=None, threshold=0.9
+    ):
+        return self.detector.extract_images(
+            image, regions, raw_detection, threshold
+        )
 
     def extract_datum(self, image, threshold=0.9):
         regions, raw_detection = self.detector.extract_region(image, threshold)

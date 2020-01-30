@@ -3,7 +3,7 @@ import logging
 import cv2
 
 from face_recognition_ros.detectors import base_face_detector
-from face_recognition_ros.core import region
+from face_recognition_ros import region
 from face_recognition_ros.utils import files
 
 
@@ -30,8 +30,10 @@ class OpencvFaceDetector(base_face_detector.BaseFaceDetector):
                 reg = region.RectangleRegion(
                     detections[i, 3] * DIMS[1] - self.margin / 2,
                     detections[i, 4] * DIMS[0] - self.margin / 2,
-                    (detections[i, 5] - detections[i, 3]) * DIMS[1] + self.margin,
-                    (detections[i, 6] - detections[i, 4]) * DIMS[0] + self.margin,
+                    (detections[i, 5] - detections[i, 3]) * DIMS[1]
+                    + self.margin,
+                    (detections[i, 6] - detections[i, 4]) * DIMS[0]
+                    + self.margin,
                     detections[i, 2],
                 )
                 logging.debug("Face {} detected: {}".format(i, str(reg)))

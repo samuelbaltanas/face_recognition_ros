@@ -1,6 +1,6 @@
 import tensorflow as tf
 
-from face_recognition_ros.core import region
+from face_recognition_ros import region
 from face_recognition_ros.detectors import base_face_detector
 from face_recognition_ros.third_party import mtcnn_tensorflow, align_mtcnn
 from face_recognition_ros.utils import files
@@ -27,7 +27,9 @@ class MtcnnFaceDetector(base_face_detector.BaseFaceDetector):
             )
 
     def extract_region(
-        self, image, threshold=0.9  # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        self,
+        image,
+        threshold=0.9,  # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     ):
 
         bbs, points = mtcnn_tensorflow.detect_face(
@@ -41,14 +43,18 @@ class MtcnnFaceDetector(base_face_detector.BaseFaceDetector):
         )
 
         regions = [
-            region.RectangleRegion(bb[0], bb[1], bb[2] - bb[0], bb[3] - bb[1], bb[4])
+            region.RectangleRegion(
+                bb[0], bb[1], bb[2] - bb[0], bb[3] - bb[1], bb[4]
+            )
             for bb in bbs
             if bb[4] >= threshold
         ]
 
         return regions, (bbs, points)
 
-    def extract_images(self, image, regions=None, raw_detection=None, align=False):
+    def extract_images(
+        self, image, regions=None, raw_detection=None, align=False
+    ):
         if raw_detection is None:
             regions, raw_detection = self.extract_region(image, 0)
 
@@ -62,7 +68,9 @@ class MtcnnFaceDetector(base_face_detector.BaseFaceDetector):
             res = []
             for idx, box in enumerate(bbox):
                 point = points[:, idx].reshape((2, 5)).T
-                aligned = align_mtcnn.align(image, box, point, image_size="160,160")
+                aligned = align_mtcnn.align(
+                    image, box, point, image_size="160,160"
+                )
                 res.append(aligned)
 
             return res

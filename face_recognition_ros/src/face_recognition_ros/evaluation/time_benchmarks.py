@@ -9,12 +9,6 @@
 # get_ipython().magic(u'matplotlib inline')
 
 import cv2
-import sys
-import os
-import logging
-import itertools
-
-import matplotlib.pyplot as plt
 
 # os.environ['MXNET_CPU_WORKER_NTHREADS'] = '4'
 # os.environ['MXNET_CPU_PRIORITY_NTHREADS'] = '8'
@@ -22,11 +16,9 @@ import matplotlib.pyplot as plt
 # os.environ['MXNET_CPU_NNPACK_NTHREADS'] = '8'
 # os.environ['MXNET_MP_OPENCV_NUM_THREADS'] = '1'
 
-sys.path.append("/home/sam/catkin_ws/src/src/face_recognition_ros/src")
+# sys.path.append("/home/sam/catkin_ws/src/src/face_recognition_ros/src")
 
-from face_recognition_ros import encoding, encoding_arc, detection
-from face_recognition_ros.core import datum
-from face_recognition_ros.classifiers import default, svm, knn
+from face_recognition_ros import encoding_arc, detection
 from face_recognition_ros.utils import config
 
 

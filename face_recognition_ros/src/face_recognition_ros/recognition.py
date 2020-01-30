@@ -1,5 +1,5 @@
 from face_recognition_ros import encoding, encoding_arc, detection
-from face_recognition_ros.core import datum
+from face_recognition_ros import datum
 from face_recognition_ros.classifiers import default, svm, knn
 
 
@@ -22,6 +22,8 @@ class Recognition:
             for idx, emb in enumerate(self.encoder.predict(face_images)):
                 face = faces[idx]  # type: datum.Datum
                 face.embedding = emb.reshape((1, -1))
-                face.identity, face.match_score = self.matcher.recognize(face.embedding)
+                face.identity, face.match_score = self.matcher.recognize(
+                    face.embedding
+                )
 
         return faces

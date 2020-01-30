@@ -24,7 +24,9 @@ class RecognitionNode:
         self.list_pub = ros.Publisher(
             "/recognition", face_msgs.IdentityList, queue_size=1
         )
-        self.im_sub = ros.Subscriber("/camera", sensor_msgs.Image, self.imageCallback)
+        self.im_sub = ros.Subscriber(
+            "/camera", sensor_msgs.Image, self.imageCallback
+        )
         # self.im_sub = ros.Subscriber("/usb_cam/image_raw", sensor_msgs.Image, self.imageCallback)
 
         self.face_det = recognition.Recognition()

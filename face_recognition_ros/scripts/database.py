@@ -35,7 +35,9 @@ def create_faces_dataset(in_dir, out_dir=None, out_file="database.pkl"):
                 faces = det.extract_images(image)
                 embedding = enc.predict(faces)
                 if embedding.shape[0] > 1:
-                    logging.warn("Multiple faces in image image {}".format(file_name))
+                    logging.warn(
+                        "Multiple faces in image image {}".format(file_name)
+                    )
                     continue
 
             except Exception as e:
@@ -48,7 +50,7 @@ def create_faces_dataset(in_dir, out_dir=None, out_file="database.pkl"):
                 labels.append(label)
                 embeddigs.append(embedding[0])
     df = pd.DataFrame({"identities": labels, "embeddings": embeddigs})
-    
+
     out_path = os.path.join(out_dir, out_file)
     df.to_pickle(out_path)
     logging.info("Face embeddings saved to {}".format(out_path))

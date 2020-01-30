@@ -1,7 +1,7 @@
 import numpy as np
 import typing
 
-from face_recognition_ros.core import region
+from face_recognition_ros import region
 
 
 class BaseFaceDetector(object):

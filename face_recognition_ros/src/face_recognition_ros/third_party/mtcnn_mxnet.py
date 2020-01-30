@@ -151,7 +151,10 @@ class MtcnnDetector(object):
                 height and width of the bbox
 
         """
-        tmpw, tmph = bboxes[:, 2] - bboxes[:, 0] + 1, bboxes[:, 3] - bboxes[:, 1] + 1
+        tmpw, tmph = (
+            bboxes[:, 2] - bboxes[:, 0] + 1,
+            bboxes[:, 3] - bboxes[:, 1] + 1,
+        )
         num_box = bboxes.shape[0]
 
         dx, dy = np.zeros((num_box,)), np.zeros((num_box,))
@@ -308,7 +311,9 @@ class MtcnnDetector(object):
             x, y = points[:, i], points[:, i + 5]
             x, y = np.round(x - 0.5 * patchw), np.round(y - 0.5 * patchw)
             [dy, edy, dx, edx, y, ey, x, ex, tmpw, tmph] = self.pad(
-                np.vstack([x, y, x + patchw - 1, y + patchw - 1]).T, width, height
+                np.vstack([x, y, x + patchw - 1, y + patchw - 1]).T,
+                width,
+                height,
             )
             for j in range(num_box):
                 tmpim = np.zeros((tmpw[j], tmpw[j], 3), dtype=np.float32)
@@ -330,10 +335,12 @@ class MtcnnDetector(object):
             output[k][tmp_index[0]] = 0.5
 
             pointx[:, k] = (
-                np.round(points[:, k] - 0.5 * patchw) + output[k][:, 0] * patchw
+                np.round(points[:, k] - 0.5 * patchw)
+                + output[k][:, 0] * patchw
             )
             pointy[:, k] = (
-                np.round(points[:, k + 5] - 0.5 * patchw) + output[k][:, 1] * patchw
+                np.round(points[:, k + 5] - 0.5 * patchw)
+                + output[k][:, 1] * patchw
             )
 
         points = np.hstack([pointx, pointy])
@@ -553,7 +560,9 @@ class MtcnnDetector(object):
             x, y = points[:, i], points[:, i + 5]
             x, y = np.round(x - 0.5 * patchw), np.round(y - 0.5 * patchw)
             [dy, edy, dx, edx, y, ey, x, ex, tmpw, tmph] = self.pad(
-                np.vstack([x, y, x + patchw - 1, y + patchw - 1]).T, width, height
+                np.vstack([x, y, x + patchw - 1, y + patchw - 1]).T,
+                width,
+                height,
             )
             for j in range(num_box):
                 tmpim = np.zeros((tmpw[j], tmpw[j], 3), dtype=np.float32)
@@ -575,10 +584,12 @@ class MtcnnDetector(object):
             output[k][tmp_index[0]] = 0.5
 
             pointx[:, k] = (
-                np.round(points[:, k] - 0.5 * patchw) + output[k][:, 0] * patchw
+                np.round(points[:, k] - 0.5 * patchw)
+                + output[k][:, 0] * patchw
             )
             pointy[:, k] = (
-                np.round(points[:, k + 5] - 0.5 * patchw) + output[k][:, 1] * patchw
+                np.round(points[:, k + 5] - 0.5 * patchw)
+                + output[k][:, 1] * patchw
             )
 
         points = np.hstack([pointx, pointy])
@@ -618,7 +629,10 @@ class MtcnnDetector(object):
             tran_m:
             tran_b:
         """
-        assert from_shape.shape[0] == to_shape.shape[0] and from_shape.shape[0] % 2 == 0
+        assert (
+            from_shape.shape[0] == to_shape.shape[0]
+            and from_shape.shape[0] % 2 == 0
+        )
 
         sigma_from = 0.0
         sigma_to = 0.0
@@ -689,15 +703,35 @@ class MtcnnDetector(object):
             else:
                 padding = 0
             # average positions of face points
-            mean_face_shape_x = [0.224152, 0.75610125, 0.490127, 0.254149, 0.726104]
-            mean_face_shape_y = [0.2119465, 0.2119465, 0.628106, 0.780233, 0.780233]
+            mean_face_shape_x = [
+                0.224152,
+                0.75610125,
+                0.490127,
+                0.254149,
+                0.726104,
+            ]
+            mean_face_shape_y = [
+                0.2119465,
+                0.2119465,
+                0.628106,
+                0.780233,
+                0.780233,
+            ]
 
             from_points = []
             to_points = []
 
             for i in range(len(shape) / 2):
-                x = (padding + mean_face_shape_x[i]) / (2 * padding + 1) * desired_size
-                y = (padding + mean_face_shape_y[i]) / (2 * padding + 1) * desired_size
+                x = (
+                    (padding + mean_face_shape_x[i])
+                    / (2 * padding + 1)
+                    * desired_size
+                )
+                y = (
+                    (padding + mean_face_shape_y[i])
+                    / (2 * padding + 1)
+                    * desired_size
+                )
                 to_points.append([x, y])
                 from_points.append([shape[2 * i], shape[2 * i + 1]])
 
@@ -712,9 +746,14 @@ class MtcnnDetector(object):
             probe_vec = tran_m * probe_vec
 
             scale = np.linalg.norm(probe_vec)
-            angle = 180.0 / math.pi * math.atan2(probe_vec[1, 0], probe_vec[0, 0])
+            angle = (
+                180.0 / math.pi * math.atan2(probe_vec[1, 0], probe_vec[0, 0])
+            )
 
-            from_center = [(shape[0] + shape[2]) / 2.0, (shape[1] + shape[3]) / 2.0]
+            from_center = [
+                (shape[0] + shape[2]) / 2.0,
+                (shape[1] + shape[3]) / 2.0,
+            ]
             to_center = [0, 0]
             to_center[1] = desired_size * 0.4
             to_center[0] = desired_size * 0.5
