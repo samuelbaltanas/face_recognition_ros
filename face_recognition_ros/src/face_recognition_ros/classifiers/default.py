@@ -14,11 +14,10 @@ class FaceMatcher:
         if conf is None:
             conf = config.CONFIG
         storage_config = conf["STORAGE"]
-        with open(storage_config["database_file"]) as f:
-            database = pickle.load(f)  # type: pd.DataFrame
-            self.labels = database.identities.to_numpy(copy=True)
-            self.embeddings = np.vstack(database.embeddings.array)
-            del database
+        database = pd.read_pickle(storage_config["database_file"])  # type: pd.DataFrame
+        self.labels = database.identities.to_numpy(copy=True, dtype=str)
+        self.embeddings = np.vstack(database.embeddings.array)
+        del database
 
     def recognize1(self, embeding, threshold=1.1):
         # type: (np.ndarray) -> (str, float)
