@@ -1,10 +1,10 @@
-import os
 import logging
+import os
 import pickle
 
 import numpy as np
 import pandas as pd
-from sklearn import svm, preprocessing
+from sklearn import preprocessing, svm
 
 
 class SVMMatcher:

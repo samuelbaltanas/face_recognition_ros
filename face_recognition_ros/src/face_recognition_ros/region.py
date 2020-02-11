@@ -1,6 +1,6 @@
 """ Collection of data structures to define regions within an image """
-import numpy as np
 import cv2
+import numpy as np
 
 
 class RectangleRegion:
@@ -58,11 +58,9 @@ class RectangleRegion:
         end2 = x.origin + x.dimensions
 
         ov = (
-            max(self.origin[0, 0], x.origin[0, 0])
-            - min(end1[0, 0], end2[0, 0])
+            max(self.origin[0, 0], x.origin[0, 0]) - min(end1[0, 0], end2[0, 0])
         ) * (
-            max(self.origin[1, 0], x.origin[1, 0])
-            - min(end1[1, 0], end2[1, 0])
+            max(self.origin[1, 0], x.origin[1, 0]) - min(end1[1, 0], end2[1, 0])
         )
 
         return ov / (self.size() + x.size() - ov)
@@ -116,9 +114,7 @@ class RectangleRegion:
         return "\n\t".join(
             [
                 "[rectangle]",
-                "origin: ({}, {})".format(
-                    self.origin[0, 0], self.origin[1, 0]
-                ),
+                "origin: ({}, {})".format(self.origin[0, 0], self.origin[1, 0]),
                 "size: ({}, {})".format(
                     self.dimensions[0, 0], self.dimensions[1, 0]
                 ),

@@ -1,19 +1,18 @@
 import os
 
 import cv2
-import numpy as np
 import mxnet as mx
+import numpy as np
+from mxnet import ndarray as nd
 from sklearn import preprocessing
 
 # import nnvm.compiler
 # import nnvm.testing
 import tvm
+import vta
+from face_recognition_ros.utils import config, files
 from tvm import relay
 from tvm.contrib import graph_runtime
-from mxnet import ndarray as nd
-import vta
-
-from face_recognition_ros.utils import files, config
 
 prefix = os.path.join(
     files.PROJECT_ROOT, "data", "models", "model-r100-ii", "model"
@@ -68,17 +67,21 @@ def compileTVM():
     image_size = (112, 112)
     opt_level = 3
 
-    shape_dict = {'data': (1, 3, *image_size)}
+    shape_dict = {"data": (1, 3, *image_size)}
     target = "cuda"
     # target = tvm.target.create("llvm -mcpu=haswell")
     # "target" means your target platform you want to compile.
 
     # target = tvm.target.create("llvm -mcpu=broadwell")
-    nnvm_sym, nnvm_params = relay.frontend.from_mxnet(sym, arg_params, aux_params)
+    nnvm_sym, nnvm_params = relay.frontend.from_mxnet(
+        sym, arg_params, aux_params
+    )
     with relay.build_config(opt_level=opt_level):
-        graph, lib, params = relay.build(nnvm_sym, target, shape_dict, params=nnvm_params)
+        graph, lib, params = relay.build(
+            nnvm_sym, target, shape_dict, params=nnvm_params
+        )
     lib.export_library("./deploy_lib.so")
-    print('lib export succeefully')
+    print("lib export succeefully")
     with open("./deploy_graph.json", "w") as fo:
         fo.write(graph.json())
     with open("./deploy_param.params", "wb") as fo:

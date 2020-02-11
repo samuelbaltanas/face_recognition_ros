@@ -1,17 +1,16 @@
 #!/usr/bin/env python2
 
-from __future__ import with_statement, print_function
+from __future__ import print_function, with_statement
 
 import errno
-import os
-from os import path
 import logging
+import os
 import typing
+from os import path
 
 import cv2
 
-from face_recognition_ros import detection
-from face_recognition_ros import region
+from face_recognition_ros import detection, region
 from face_recognition_ros.utils import config, files
 
 fold_dir = path.expanduser("~/datasets/fddb/FDDB-folds/")

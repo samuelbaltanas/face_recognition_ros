@@ -1,8 +1,8 @@
 import numpy as np
 import tensorflow as tf
 
-from face_recognition_ros.utils import files, config
 from face_recognition_ros.third_party import facenet
+from face_recognition_ros.utils import config, files
 
 
 class FacialEncoder:

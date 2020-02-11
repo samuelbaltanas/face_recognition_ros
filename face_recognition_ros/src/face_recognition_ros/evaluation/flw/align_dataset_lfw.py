@@ -21,20 +21,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
-from scipy import misc
-import sys
-import os
 import argparse
-import numpy as np
+import os
 import random
+import sys
 from time import sleep
 
-import facenet
+import numpy as np
+from scipy import misc
 
+import facenet
 from face_recognition_ros import detection
 from face_recognition_ros.utils import config
 
@@ -132,9 +130,10 @@ def create_dataset_mtcnn(args):
                                 )[0]
 
                                 nrof_successfully_aligned += 1
-                                filename_base, file_extension = os.path.splitext(
-                                    output_filename
-                                )
+                                (
+                                    filename_base,
+                                    file_extension,
+                                ) = os.path.splitext(output_filename)
                                 if args.detect_multiple_faces:
                                     output_filename_n = "{}_{}{}".format(
                                         filename_base, i, file_extension

@@ -2,7 +2,7 @@ import tensorflow as tf
 
 from face_recognition_ros import region
 from face_recognition_ros.detectors import base_face_detector
-from face_recognition_ros.third_party import mtcnn_tensorflow, align_mtcnn
+from face_recognition_ros.third_party import align_mtcnn, mtcnn_tensorflow
 from face_recognition_ros.utils import files
 
 

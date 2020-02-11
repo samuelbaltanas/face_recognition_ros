@@ -1,11 +1,9 @@
 import logging
 
 import dlib
-
-from face_recognition_ros.detectors import base_face_detector
 from face_recognition_ros import region
+from face_recognition_ros.detectors import base_face_detector
 from face_recognition_ros.utils import files
-
 
 DETECT_MODEL = files.get_model_path("", "mmod_human_face_detector.dat")
 ALIGN_MODEL = files.get_model_path("", "shape_predictor_5_face_landmarks.dat")

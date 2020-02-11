@@ -1,0 +1,6 @@
+model-r100-ii: 
+  desc: ""
+  url: https://www.dropbox.com/s/tj96fsm6t6rq8ye/model-r100-arcface-ms1m-refine-v2.zip?dl=1
+model-y1-test2:
+  desc: ""
+  url: https://www.dropbox.com/s/akxeqp99jvsd6z7/model-MobileFaceNet-arcface-ms1m-refine-v1.zip?dl=1

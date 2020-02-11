@@ -1,19 +1,18 @@
 # https://github.com/natanielruiz/deep-head-pose/blob/master/code/datasets.py
 # https://github.com/shamangary/FSA-Net/blob/master/demo/demo_FSANET.py
 
-import os
-from os import path
-import typing
-import itertools
 import collections
+import itertools
+import os
+import typing
+from os import path
 
-import numpy as np
-from matplotlib import pyplot as plt
-import pandas as pd
 import cv2
+import numpy as np
+import pandas as pd
+from matplotlib import pyplot as plt
 
-from face_recognition_ros import detection, encoding_arc, recognition
-from face_recognition_ros import datum
+from face_recognition_ros import datum, detection, encoding_arc, recognition
 from face_recognition_ros.utils import config
 
 # Default paths to the dataset
@@ -102,7 +101,7 @@ def eval_on_biwi(store_file, results_fol, store_each=20, overwrite=False):
     dataset = BiwiDataset()
 
     cached_results = len(os.listdir(results_fol))
-    start = int(store_each*cached_results)
+    start = int(store_each * cached_results)
     results = {
         "is_same": [],
         "score": [],
@@ -135,7 +134,9 @@ def eval_on_biwi(store_file, results_fol, store_each=20, overwrite=False):
 
         if ctr % 10 == 9:
             print(
-                "\rImages processed: {}/~14000. Current folder: {}.".format(ctr, iden),
+                "\rImages processed: {}/~14000. Current folder: {}.".format(
+                    ctr, iden
+                ),
                 end="",
             )
 
@@ -306,7 +307,9 @@ class BiwiDataset:
             f1 = "{:02d}".format(identifier)
             parent = path.join(self._dir, f1)
             # Gather individual images
-            for f in sorted(f.name for f in os.scandir(parent) if f.name.endswith(".png")):
+            for f in sorted(
+                f.name for f in os.scandir(parent) if f.name.endswith(".png")
+            ):
                 frame = int(f.split("_")[1])
                 yield identifier, frame
 

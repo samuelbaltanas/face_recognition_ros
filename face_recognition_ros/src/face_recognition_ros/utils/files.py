@@ -2,7 +2,6 @@
 import os
 from os import path
 
-
 PROJECT_ROOT = os.path.dirname(
     path.dirname(path.dirname(path.dirname(path.abspath(__file__))))
 )

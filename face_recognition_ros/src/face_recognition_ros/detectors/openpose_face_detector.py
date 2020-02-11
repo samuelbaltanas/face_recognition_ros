@@ -9,13 +9,13 @@ from scipy.spatial.distance import euclidean as dist
 
 from face_recognition_ros import region
 from face_recognition_ros.detectors import base_face_detector
+from openpose import pyopenpose as op  # noqa: E402
 
 # Path in which openpose is installed after using `make install`
 # You may comment this line if it is already included in PYTHONPATH
 
 # sys.path.append('/usr/local/python')
 
-from openpose import pyopenpose as op  # noqa: E402
 
 threshold = 0.15
 

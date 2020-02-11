@@ -23,9 +23,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 import os
 
@@ -33,8 +31,8 @@ import numpy as np
 from scipy import interpolate
 from sklearn import model_selection
 
-from face_recognition_ros.utils.math import dist as distance
 from face_recognition_ros.third_party import facenet
+from face_recognition_ros.utils.math import dist as distance
 
 
 def evaluate(
@@ -146,9 +144,7 @@ def calculate_roc(
             )
         else:
             mean = 0.0
-        dist = distance(
-            embeddings1 - mean, embeddings2 - mean, distance_metric
-        )
+        dist = distance(embeddings1 - mean, embeddings2 - mean, distance_metric)
 
         # Find the best threshold for the fold
         acc_train = np.zeros((nrof_thresholds))
@@ -158,9 +154,11 @@ def calculate_roc(
             )
         best_threshold_index = np.argmax(acc_train)
         for threshold_idx, threshold in enumerate(thresholds):
-            tprs[fold_idx, threshold_idx], fprs[
-                fold_idx, threshold_idx
-            ], _ = calculate_accuracy(
+            (
+                tprs[fold_idx, threshold_idx],
+                fprs[fold_idx, threshold_idx],
+                _,
+            ) = calculate_accuracy(
                 threshold, dist[test_set], actual_issame[test_set]
             )
         _, _, accuracy[fold_idx] = calculate_accuracy(
@@ -222,9 +220,7 @@ def calculate_val(
             )
         else:
             mean = 0.0
-        dist = distance(
-            embeddings1 - mean, embeddings2 - mean, distance_metric
-        )
+        dist = distance(embeddings1 - mean, embeddings2 - mean, distance_metric)
 
         # Find the threshold that gives FAR = far_target
         far_train = np.zeros(nrof_thresholds)
