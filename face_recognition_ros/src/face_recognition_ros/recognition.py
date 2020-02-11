@@ -1,6 +1,5 @@
-from face_recognition_ros import encoding, encoding_arc, detection
-from face_recognition_ros import datum
-from face_recognition_ros.classifiers import default, svm, knn
+from face_recognition_ros import datum, detection, encoding, encoding_arc
+from face_recognition_ros.classifiers import default, knn, svm
 
 
 class Recognition:

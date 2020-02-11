@@ -1,14 +1,13 @@
-import cv2
-import numpy as np
 import pickle
 
-from sklearn import metrics
+import cv2
+import numpy as np
 from scipy import interpolate, optimize
+from sklearn import metrics
 
 from face_recognition_ros import encoding, encoding_arc
-from face_recognition_ros.utils import config
 from face_recognition_ros.evaluation.flw import lfw_utils
-
+from face_recognition_ros.utils import config
 
 LFW_ROOT = "/home/sam/datasets/flw/"
 

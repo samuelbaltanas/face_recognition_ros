@@ -2,12 +2,12 @@
 
 import sys
 
+import cv_bridge
 import rospy as ros
 import sensor_msgs.msg as sensor_msgs
-import cv_bridge
 
+from face_recognition_ros import core, recognition  # noqa: E402
 from face_recognition_ros.utils import config  # noqa: E402
-from face_recognition_ros import recognition, core  # noqa: E402
 from face_recognition_ros_msgs import msg as face_msgs
 
 NODE_NAME = "face_recognition_node"

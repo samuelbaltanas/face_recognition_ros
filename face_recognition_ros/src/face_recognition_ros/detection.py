@@ -1,11 +1,11 @@
 import numpy as np
 
 from face_recognition_ros import datum
-from face_recognition_ros.utils import config
 from face_recognition_ros.detectors import (
     mtcnn_mxnet_detector,
     opencv_face_detector,
 )
+from face_recognition_ros.utils import config
 
 # mtcnn_face_detector,
 # dlib_face_detector,

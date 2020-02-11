@@ -10,6 +10,9 @@
 
 import cv2
 
+from face_recognition_ros import detection, encoding_arc
+from face_recognition_ros.utils import config
+
 # os.environ['MXNET_CPU_WORKER_NTHREADS'] = '4'
 # os.environ['MXNET_CPU_PRIORITY_NTHREADS'] = '8'
 # os.environ['OMP_NUM_THREADS'] = '8'
@@ -17,9 +20,6 @@ import cv2
 # os.environ['MXNET_MP_OPENCV_NUM_THREADS'] = '1'
 
 # sys.path.append("/home/sam/catkin_ws/src/src/face_recognition_ros/src")
-
-from face_recognition_ros import encoding_arc, detection
-from face_recognition_ros.utils import config
 
 
 # In[2]:

@@ -1,10 +1,10 @@
 # coding: utf-8
 import numpy as np
 
-from face_recognition_ros import region, datum
+from face_recognition_ros import datum, region
 
 # from face_recognition_ros.detectors import base_face_detector
-from face_recognition_ros.third_party import mtcnn_mxnet, align_mtcnn
+from face_recognition_ros.third_party import align_mtcnn, mtcnn_mxnet
 from face_recognition_ros.utils import files
 
 

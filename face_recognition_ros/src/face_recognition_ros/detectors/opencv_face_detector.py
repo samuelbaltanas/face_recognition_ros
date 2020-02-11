@@ -2,8 +2,8 @@ import logging
 
 import cv2
 
-from face_recognition_ros.detectors import base_face_detector
 from face_recognition_ros import region
+from face_recognition_ros.detectors import base_face_detector
 from face_recognition_ros.utils import files
 
 

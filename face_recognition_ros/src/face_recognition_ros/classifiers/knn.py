@@ -1,10 +1,10 @@
+import logging
 import os
 import pickle
-import logging
 
 import numpy as np
 import pandas as pd
-from sklearn import svm, preprocessing, neighbors
+from sklearn import neighbors, preprocessing, svm
 
 
 class KNNMatcher:

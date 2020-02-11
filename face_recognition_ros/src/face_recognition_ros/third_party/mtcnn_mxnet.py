@@ -1,21 +1,22 @@
 # coding: utf-8
+import math
 import os
+from itertools import repeat
+
+import cv2
 import mxnet as mx
 import numpy as np
-import math
-import cv2
-from itertools import repeat
+
+from face_recognition_ros.third_party.helper import (
+    adjust_input,
+    detect_first_stage_warpper,
+    nms,
+)
 
 try:
     from itertools import izip
 except ImportError:
     izip = zip
-
-from face_recognition_ros.third_party.helper import (
-    nms,
-    adjust_input,
-    detect_first_stage_warpper,
-)
 
 
 class MtcnnDetector(object):
@@ -335,8 +336,7 @@ class MtcnnDetector(object):
             output[k][tmp_index[0]] = 0.5
 
             pointx[:, k] = (
-                np.round(points[:, k] - 0.5 * patchw)
-                + output[k][:, 0] * patchw
+                np.round(points[:, k] - 0.5 * patchw) + output[k][:, 0] * patchw
             )
             pointy[:, k] = (
                 np.round(points[:, k + 5] - 0.5 * patchw)
@@ -584,8 +584,7 @@ class MtcnnDetector(object):
             output[k][tmp_index[0]] = 0.5
 
             pointx[:, k] = (
-                np.round(points[:, k] - 0.5 * patchw)
-                + output[k][:, 0] * patchw
+                np.round(points[:, k] - 0.5 * patchw) + output[k][:, 0] * patchw
             )
             pointy[:, k] = (
                 np.round(points[:, k + 5] - 0.5 * patchw)

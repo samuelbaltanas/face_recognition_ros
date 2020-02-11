@@ -4,7 +4,6 @@ import cv2
 
 from face_recognition_ros import region
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -38,9 +37,7 @@ class MultiTracker:
         for i, tr in enumerate(self.tracklets):
             retval, bbox = tr.tracker.update(image)
             if retval:
-                reg = region.RectangleRegion(
-                    bbox[0], bbox[1], bbox[2], bbox[3]
-                )
+                reg = region.RectangleRegion(bbox[0], bbox[1], bbox[2], bbox[3])
                 res.append(reg)
             else:
                 # DONE Destroy tracker condition
