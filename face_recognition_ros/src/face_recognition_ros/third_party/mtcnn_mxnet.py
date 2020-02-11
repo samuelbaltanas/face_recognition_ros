@@ -606,7 +606,7 @@ class MtcnnDetector(object):
                 input list
         Retures:
         -------
-            colMat: 
+            colMat:
 
         """
         assert len(pts_list) > 0
@@ -622,8 +622,8 @@ class MtcnnDetector(object):
             find transform between shapes
         Parameters:
         ----------
-            from_shape: 
-            to_shape: 
+            from_shape:
+            to_shape:
         Retures:
         -------
             tran_m:
@@ -689,7 +689,7 @@ class MtcnnDetector(object):
         Retures:
         -------
             crop_imgs: list, n
-                cropped and aligned faces 
+                cropped and aligned faces
         """
         crop_imgs = []
         for p in points:

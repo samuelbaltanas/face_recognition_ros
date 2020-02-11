@@ -1,3 +1,5 @@
+import numpy as np
+
 from face_recognition_ros import datum
 from face_recognition_ros.utils import config
 from face_recognition_ros.detectors import (
@@ -33,23 +35,27 @@ class FacialDetector:
 
         self.detector = METHODS[method](method_conf)
 
+    def predict(
+        self, X: np.ndarray, threshold=0.95, extract_image=False
+    ) -> datum.Datum:
+        return self.detector.predict(X, threshold, extract_image)
+
+
+"""
     def extract_region(self, image, threshold=0.9):
         return self.detector.extract_region(image, threshold)
 
-    def extract_images(
-        self, image, regions=None, raw_detection=None, threshold=0.9
-    ):
-        return self.detector.extract_images(
-            image, regions, raw_detection, threshold
-        )
+    def extract_images(self, image, regions=None, threshold=0.9):
+        return self.detector.extract_images(image, regions, threshold)
 
     def extract_datum(self, image, threshold=0.9):
-        regions, raw_detection = self.detector.extract_region(image, threshold)
-        images = self.detector.extract_images(image, regions, raw_detection)
+        regions = self.detector.extract_region(image, threshold)
+        images = self.detector.extract_images(image, regions)
 
         data = [
-            datum.Datum(face_region=reg, face_image=im)
+            datum.Datum(region=reg, image=im)
             for reg, im in zip(regions, images)
         ]
 
         return data
+"""

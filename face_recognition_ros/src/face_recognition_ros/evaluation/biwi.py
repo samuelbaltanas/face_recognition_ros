@@ -4,6 +4,8 @@
 import os
 from os import path
 import typing
+import itertools
+import collections
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -15,8 +17,8 @@ from face_recognition_ros import datum
 from face_recognition_ros.utils import config
 
 # Default paths to the dataset
-BIWI_DIR = "/home/sam/datasets/hpdb/"
-ANNOT_DIR = "/home/sam/datasets/hpdb/"
+BIWI_DIR = "/home/sam/Datasets/hpdb/"
+ANNOT_DIR = "/home/sam/Datasets/hpdb/"
 # ANNOT_DIR = "/home/sam/datasets/hpdb/db_annotations/"
 
 # Configuration of the depth camera in the BIWI dataset
@@ -25,32 +27,10 @@ CAMERA_MATRIX = np.eye(3)
 TVEC = np.zeros((3, 1))
 DIST_COEFFS = (0, 0, 0, 0)
 
-MIN_ANGLES = [
-    269,
-    504,
-    395,
-    476,
-    493,
-    431,
-    390,
-    29,
-    616,
-    425,
-    382,
-    276,
-    216,
-    792,
-    389,
-    503,
-    138,
-    207,
-    129,
-    198,
-    255,
-    280,
-    327,
-    192,
-]
+
+def load_identities(path="/home/sam/datasets/hpdb/dataset_info.csv"):
+    cinv = {"folder": str, "iden": str, "center_frame": int, "sex": str}
+    return pd.read_csv(path, converters=cinv)
 
 
 def seek_min_angles():
@@ -82,38 +62,47 @@ def create_biwi_db(out_path):
     labels = []
     embeddings = []
 
+    aux_info = load_identities()
+
     # Create faces database (MIN_ANGLES)
-    for idx, frame in enumerate(MIN_ANGLES):
-        iden = idx + 1
-        im_path, (center3D, angle) = dataset[iden, frame]
+    for idx in range(len(aux_info)):
+        label = aux_info.iden[idx]
+        if label in labels:
+            continue
+
+        iden = aux_info.folder[idx]
+        frame = aux_info.center_frame[idx]
+        im_path, (center3D, angle) = dataset[int(iden), frame]
 
         image = cv2.imread(im_path)
 
-        x = detector.extract_region(image)
-        face_match = match_detection(x, (center3D, angle))
-        region, (bbox, points) = x
-        face = detector.extract_images(
-            image,
-            [region[face_match]],
-            (bbox[[face_match]], points[[face_match]]),
-        )
-        embedding = encoder.predict(face)
+        data = detector.predict(image, extract_image=True)
+        face_match = match_detection(data, (center3D, angle))
+        embedding = encoder.predict([data[face_match].image])
 
-        labels.append(str(iden))
+        labels.append(label)
         embeddings.append(embedding[0])
+
+        if idx % 5 == 4:
+            print("\rProgress: {}/{}".format(idx + 1, len(aux_info)), end="")
 
     df = pd.DataFrame({"identities": labels, "embeddings": embeddings})
     df.to_pickle(out_path)
+    print("\rProgress: {}/{}".format(idx + 1, len(aux_info)), end="")
     # logging.info("Face embeddings saved to {}".format(out_path))
     return df
 
 
-def eval_on_biwi(store_file, results_file):
+def eval_on_biwi(store_file, results_fol, store_each=20, overwrite=False):
     config.load_config()
     config.CONFIG["STORAGE"]["database_file"] = store_file
+
+    aux_info = load_identities()
     face_rec = recognition.Recognition()
     dataset = BiwiDataset()
 
+    cached_results = len(os.listdir(results_fol))
+    start = int(store_each*cached_results)
     results = {
         "is_same": [],
         "score": [],
@@ -124,30 +113,52 @@ def eval_on_biwi(store_file, results_file):
     }
 
     # Eval
-    for ctr, (iden, frame) in enumerate(dataset):
+    for ctr, (iden, frame) in itertools.islice(enumerate(dataset), start, None):
         image_path, (center3D, angle) = dataset[iden, frame]
         image = cv2.imread(image_path)
         faces = face_rec.recognize(image)  # type: typing.List[datum.Datum]
-        match = match_detection((i.region for i in faces), (center3D, angle))
+        match = match_detection(faces, (center3D, angle))
 
-        face = faces[match]
         if match is None:
-            results["score"].append(np.inf)
+            results["score"].append(1.0)
+            results["is_same"].append(False)
         else:
-            results["score"].append(face.match_score)
-        results["is_same"].append(face.identity == iden)
+            results["score"].append(faces[match].match_score)
+            results["is_same"].append(
+                faces[match].identity == aux_info.iden[iden - 1]
+            )
         results["label"].append(iden)
 
         results["roll"].append(angle[0])
         results["pitch"].append(angle[1])
         results["yaw"].append(angle[2])
 
-        if ctr % 10 == 0:
-            print("Iter: {}".format(ctr))
+        if ctr % 10 == 9:
+            print(
+                "\rImages processed: {}/~14000. Current folder: {}.".format(ctr, iden),
+                end="",
+            )
+
+        if ctr % store_each == store_each - 1:
+            df = pd.DataFrame(results)
+            df.to_pickle(path.join(results_fol, "results_{}.pkl".format(ctr)))
+            results = {
+                "is_same": [],
+                "score": [],
+                "label": [],
+                "roll": [],
+                "yaw": [],
+                "pitch": [],
+            }
 
     df = pd.DataFrame(results)
-    df.to_pickle(results_file)
-    return df
+    df.to_pickle(path.join(results_fol, "results_END.pkl"))
+
+
+def append_location():
+    dataset = BiwiDataset()
+    for ctr, (iden, frame) in enumerate(dataset):
+        pass
 
 
 def projectPoints(points):
@@ -228,18 +239,16 @@ def draw_axis(img, angle, center=None, size=40):
     return img
 
 
-def draw_biwi_image(image, det_regions, ground_truth, match=None, iden=""):
+def draw_biwi_image(image, det_data, ground_truth, match=None, iden=""):
     plt.figure()
     center, angle = ground_truth
-    reg, (bb, pt) = det_regions
 
-    for idx, i in enumerate(reg):
+    for idx, dat in enumerate(det_data):
         if idx == match:
-            i.draw(image, label=str(iden))
-        else:
-            i.draw(image)
+            dat.identity = str(iden)
+        dat.draw(image)
     if match is not None:
-        pt = pt[match].reshape((2, 5)).T
+        pt = det_data[match].keypoints.reshape((2, 5)).T
         center2D = pt[2]
         draw_axis(image, angle, center2D)
     plt.imshow(image)
@@ -248,19 +257,16 @@ def draw_biwi_image(image, det_regions, ground_truth, match=None, iden=""):
     plt.show()
 
 
-def match_detection(det_regions, ground_truth):
-    if len(det_regions[0]) == 0:
-        return None
-
+def match_detection(det_data, ground_truth):
     center, angle = ground_truth
     pp = projectPoints(center)[0].ravel()
 
     best = (None, np.infty)
-    for idx, region in enumerate(det_regions[0]):
-        og_x = region.origin[0, 0]
-        og_y = region.origin[1, 0]
-        d_x = region.dimensions[0, 0]
-        d_y = region.dimensions[1, 0]
+    for idx, dat in enumerate(det_data):
+        og_x = dat.region.origin[0, 0]
+        og_y = dat.region.origin[1, 0]
+        d_x = dat.region.dimensions[0, 0]
+        d_y = dat.region.dimensions[1, 0]
 
         if (
             pp[0] < og_x
@@ -300,15 +306,14 @@ class BiwiDataset:
             f1 = "{:02d}".format(identifier)
             parent = path.join(self._dir, f1)
             # Gather individual images
-            for f in os.scandir(parent):
-                f = f.name
-                if f.endswith(".png"):
-                    frame = int(f.split("_")[1])
-                    yield identifier, frame
+            for f in sorted(f.name for f in os.scandir(parent) if f.name.endswith(".png")):
+                frame = int(f.split("_")[1])
+                yield identifier, frame
 
 
 if __name__ == "__main__":
     DB_PATH = "/home/sam/Desktop/biwi.pkl"
-    RES_PATH = "/home/sam/Desktop/biwi_res.pkl"
+    RES_PATH = "/home/sam/Desktop/biwi_res/"
     config.load_config()
-    df = create_biwi_db(DB_PATH)
+    # df = create_biwi_db(DB_PATH)
+    eval_on_biwi(DB_PATH, RES_PATH, store_each=100)

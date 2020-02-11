@@ -1,11 +1,6 @@
 """ Collection of data structures to define regions within an image """
-import typing
-
 import numpy as np
 import cv2
-
-
-from face_recognition_ros.utils.math import rotate
 
 
 class RectangleRegion:
@@ -41,7 +36,7 @@ class RectangleRegion:
 
         return res
 
-    def to_cvbox(self, margin=0.0):
+    def to_cvbox(self, margin=0.0, score=False):
         cvbox = [
             self.origin[0, 0],
             self.origin[1, 0],
@@ -53,6 +48,8 @@ class RectangleRegion:
             cvbox[1] -= self.dimensions[1, 0] * margin / 2
             cvbox[2] += self.dimensions[0, 0] * margin / 2
             cvbox[3] += self.dimensions[1, 0] * margin / 2
+        if score:
+            cvbox.append(self.detection_score)
 
         return tuple(cvbox)
 
@@ -144,6 +141,7 @@ class RectangleRegion:
         )
 
 
+"""
 class EllipseRegion:
     def __init__(
         self,
@@ -231,3 +229,4 @@ class EllipseRegion:
 
 
 Region = typing.Union[RectangleRegion, EllipseRegion]
+"""

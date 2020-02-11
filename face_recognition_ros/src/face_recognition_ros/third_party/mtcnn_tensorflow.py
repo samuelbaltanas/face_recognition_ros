@@ -154,10 +154,11 @@ class Network(object):
         # Verify that the grouping parameter is valid
         assert c_i % group == 0
         assert c_o % group == 0
+
         # Convolution for a given input and kernel
-        convolve = lambda i, k: tf.nn.conv2d(
-            i, k, [1, s_h, s_w, 1], padding=padding
-        )
+        def convolve(i, k):
+            tf.nn.conv2d(i, k, [1, s_h, s_w, 1], padding=padding)
+
         with tf.variable_scope(name) as scope:
             kernel = self.make_var(
                 "weights", shape=[k_h, k_w, c_i // group, c_o]
@@ -330,18 +331,28 @@ def create_mtcnn(sess, model_path):
         onet = ONet({"data": data})
         onet.load(os.path.join(model_path, "det3.npy"), sess)
 
-    pnet_fun = lambda img: sess.run(
-        ("pnet/conv4-2/BiasAdd:0", "pnet/prob1:0"),
-        feed_dict={"pnet/input:0": img},
-    )
-    rnet_fun = lambda img: sess.run(
-        ("rnet/conv5-2/conv5-2:0", "rnet/prob1:0"),
-        feed_dict={"rnet/input:0": img},
-    )
-    onet_fun = lambda img: sess.run(
-        ("onet/conv6-2/conv6-2:0", "onet/conv6-3/conv6-3:0", "onet/prob1:0"),
-        feed_dict={"onet/input:0": img},
-    )
+    def pnet_fun(img):
+        sess.run(
+            ("pnet/conv4-2/BiasAdd:0", "pnet/prob1:0"),
+            feed_dict={"pnet/input:0": img},
+        )
+
+    def rnet_fun(img):
+        sess.run(
+            ("rnet/conv5-2/conv5-2:0", "rnet/prob1:0"),
+            feed_dict={"rnet/input:0": img},
+        )
+
+    def onet_fun(img):
+        sess.run(
+            (
+                "onet/conv6-2/conv6-2:0",
+                "onet/conv6-3/conv6-3:0",
+                "onet/prob1:0",
+            ),
+            feed_dict={"onet/input:0": img},
+        )
+
     return pnet_fun, rnet_fun, onet_fun
 
 

@@ -8,7 +8,7 @@ setup_args = generate_distutils_setup(
     author="Samuel Felipe Baltanas Molero",
     author_email="samuelbaltanas@gmail.com",
     version="0.0.0",
-    scripts=["scripts/compare_faces_demo", "scripts/save_embedings"],
+    scripts=["scripts/save_embedings"],
     packages=["face_recognition_ros"],  # , 'facenet'],
     package_dir={"": "src"},
 )

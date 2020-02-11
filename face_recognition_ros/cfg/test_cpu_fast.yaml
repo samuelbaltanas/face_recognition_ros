@@ -3,7 +3,7 @@ ROS:
   identity_topic: "/face_ids"
 
 STORAGE:
-  database_file: "/home/sam/UMA/4/4_2/3-TFG/3-Workspace/face_recognition_ros/face_recognition_ros/data/database/labo_dataset/lab.pkl"
+  database_file: "/home/sam/Workspace/projects/1-FaceRecognition/face_recognition_ros/face_recognition_ros/data/database/labo_dataset/lab.pkl"
   # database_file: "/home/sam/UMA/4/4_2/3-TFG/3-Workspace/face_recognition_ros/face_recognition_ros/data/database/family_dataset/dataset_ark2.pkl"
 
 FACENET:

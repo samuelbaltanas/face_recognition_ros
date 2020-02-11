@@ -15,9 +15,9 @@ class Recognition:
         # self.matcher = knn.KNNMatcher(config)
 
     def recognize(self, image):
-        faces = self.detector.extract_datum(image)
+        faces = self.detector.predict(image, extract_image=True)
         if len(faces) > 0:
-            face_images = [face.face_image for face in faces]
+            face_images = [face.image for face in faces]
 
             for idx, emb in enumerate(self.encoder.predict(face_images)):
                 face = faces[idx]  # type: datum.Datum

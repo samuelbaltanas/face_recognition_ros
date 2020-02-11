@@ -44,12 +44,12 @@ from six import iteritems
 
 def triplet_loss(anchor, positive, negative, alpha):
     """Calculate the triplet loss according to the FaceNet paper
-    
+
     Args:
       anchor: the embeddings for the anchor images.
       positive: the embeddings for the positive images.
       negative: the embeddings for the negative images.
-  
+
     Returns:
       the triplet loss according to the FaceNet paper as a float tensor.
     """
@@ -173,10 +173,10 @@ def get_control_flag(control, field):
 
 def _add_loss_summaries(total_loss):
     """Add summaries for losses.
-  
+
     Generates moving average for all losses and associated summaries for
     visualizing the performance of the network.
-  
+
     Args:
       total_loss: Total loss from loss().
     Returns:

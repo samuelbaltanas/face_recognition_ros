@@ -12,8 +12,8 @@ class BaseFaceDetector(object):
         # type: (np.ndarray)
         raise NotImplementedError()
 
-    def extract_images(self, image, regions=None, raw_detection=None):
+    def extract_images(self, image, regions=None):
         # type: (np.ndarray, typing.Optional[region.Region], typing.Any) -> typing.List[np.ndarray]
         if regions is None:
-            regions, _ = self.extract_region(image)
-        return [r.extract_face(image) for r in regions]
+            regions = self.extract_region(image)
+        return [r.region.extract_face(image) for r in regions]

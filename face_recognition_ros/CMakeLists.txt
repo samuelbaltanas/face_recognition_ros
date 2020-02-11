@@ -19,9 +19,9 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules")
 
 ## System dependencies are found with CMake's conventions
 find_package(GFlags)
-find_package(Glog)
+#find_package(glog)
 find_package(OpenCV)
-find_package(OpenPose REQUIRED)
+# find_package(OpenPose REQUIRED)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -125,9 +125,9 @@ catkin_package(
 include_directories(
   # include
   ${catkin_INCLUDE_DIRS}
-  ${OpenPose_INCLUDE_DIRS}
+  # ${OpenPose_INCLUDE_DIRS}
   ${GFLAGS_INCLUDE_DIR}
-  ${GLOG_INCLUDE_DIR}
+  #${GLOG_INCLUDE_DIR}
   ${OpenCV_INCLUDE_DIRS}
 )
 
@@ -171,7 +171,6 @@ include_directories(
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
 install(PROGRAMS
-  scripts/compare_faces_demo
   scripts/save_embedings
   nodes/dummy_camera_node
   nodes/facial_recognition_node
