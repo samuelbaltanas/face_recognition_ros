@@ -1,11 +1,11 @@
 # https://github.com/natanielruiz/deep-head-pose/blob/master/code/datasets.py
 # https://github.com/shamangary/FSA-Net/blob/master/demo/demo_FSANET.py
 
-import collections
 import itertools
 import os
 import typing
 from os import path
+import tqdm
 
 import cv2
 import numpy as np
@@ -16,9 +16,7 @@ from face_recognition_ros import datum, detection, encoding_arc, recognition
 from face_recognition_ros.utils import config
 
 # Default paths to the dataset
-BIWI_DIR = "/home/sam/Datasets/hpdb/"
-ANNOT_DIR = "/home/sam/Datasets/hpdb/"
-# ANNOT_DIR = "/home/sam/datasets/hpdb/db_annotations/"
+BIWI_DIR = "/home/sam/Datasets/data/hpdb/"
 
 # Configuration of the depth camera in the BIWI dataset
 RVEC = np.array([[517.679, 0, 320], [0, 517.679, 240.5], [0, 0, 1]])
@@ -27,7 +25,7 @@ TVEC = np.zeros((3, 1))
 DIST_COEFFS = (0, 0, 0, 0)
 
 
-def load_identities(path="/home/sam/datasets/hpdb/dataset_info.csv"):
+def load_identities(path=path.join(BIWI_DIR, "dataset_info.csv")):
     cinv = {"folder": str, "iden": str, "center_frame": int, "sex": str}
     return pd.read_csv(path, converters=cinv)
 
@@ -38,7 +36,7 @@ def seek_min_angles():
     dataset = BiwiDataset()
 
     for iden, frame in dataset:
-        image_path, (center3D, angle) = dataset[iden, frame]
+        _, (_, angle) = dataset[iden, frame]
         idx = int(iden) - 1
         abs_angle = np.abs(angle[0]) + np.abs(angle[1]) + np.abs(angle[2])
 
@@ -55,8 +53,8 @@ def create_biwi_db(out_path):
     # Processing pipeline
     config.load_config()
     # config.logger_config()
-    detector = detection.FacialDetector()
-    encoder = encoding_arc.EncodingArc()
+    detector = detection.FaceDetector()
+    encoder = encoding_arc.FaceEncoder()
 
     labels = []
     embeddings = []
@@ -92,7 +90,7 @@ def create_biwi_db(out_path):
     return df
 
 
-def eval_on_biwi(store_file, results_fol, store_each=20, overwrite=False):
+def eval_on_biwi(store_file, results_fol, store_each=-1, overwrite=False):
     config.load_config()
     config.CONFIG["STORAGE"]["database_file"] = store_file
 
@@ -101,65 +99,61 @@ def eval_on_biwi(store_file, results_fol, store_each=20, overwrite=False):
     dataset = BiwiDataset()
 
     cached_results = len(os.listdir(results_fol))
-    start = int(store_each * cached_results)
+    start = int(store_each * cached_results) if store_each > 0 else 0
     results = {
-        "is_same": [],
+        "image_id": [],
+        "image_frame": [],
         "score": [],
-        "label": [],
+        "pred_id": [],
+        "true_id": [],
         "roll": [],
         "yaw": [],
         "pitch": [],
     }
 
-    # Eval
-    for ctr, (iden, frame) in itertools.islice(enumerate(dataset), start, None):
-        image_path, (center3D, angle) = dataset[iden, frame]
-        image = cv2.imread(image_path)
-        faces = face_rec.recognize(image)  # type: typing.List[datum.Datum]
-        match = match_detection(faces, (center3D, angle))
+    with tqdm(15700) as pbar:
+        # Eval
+        for ctr, (iden, frame) in itertools.islice(enumerate(dataset), start, None):
+            image_path, (center3D, angle) = dataset[iden, frame]
+            image = cv2.imread(image_path)
+            faces = face_rec.recognize(image)  # type: typing.List[datum.Datum]
+            match = match_detection(faces, (center3D, angle))
 
-        if match is None:
-            results["score"].append(1.0)
-            results["is_same"].append(False)
-        else:
-            results["score"].append(faces[match].match_score)
-            results["is_same"].append(
-                faces[match].identity == aux_info.iden[iden - 1]
-            )
-        results["label"].append(iden)
+            if match is None:
+                results["score"].append(1.0)
+                results["pred_id"].append("???")
+            else:
+                results["score"].append(faces[match].match_score)
+                results["pred_id"].append(faces[match].identity)
+            results["true_id"].append(aux_info.iden[iden - 1])
 
-        results["roll"].append(angle[0])
-        results["pitch"].append(angle[1])
-        results["yaw"].append(angle[2])
+            results["image_id"].append(iden)
+            results["image_frame"].append(frame)
 
-        if ctr % 10 == 9:
-            print(
-                "\rImages processed: {}/~14000. Current folder: {}.".format(
-                    ctr, iden
-                ),
-                end="",
-            )
+            results["roll"].append(angle[0])
+            results["pitch"].append(angle[1])
+            results["yaw"].append(angle[2])
 
-        if ctr % store_each == store_each - 1:
-            df = pd.DataFrame(results)
-            df.to_pickle(path.join(results_fol, "results_{}.pkl".format(ctr)))
-            results = {
-                "is_same": [],
-                "score": [],
-                "label": [],
-                "roll": [],
-                "yaw": [],
-                "pitch": [],
-            }
+            pbar.update(1)
+
+            if store_each > 0 and ctr % store_each == store_each - 1:
+                df = pd.DataFrame(results)
+                df.to_pickle(path.join(results_fol, "results_{}.pkl".format(ctr)))
+                results = {
+                    "image_id": [],
+                    "image_frame": [],
+                    "score": [],
+                    "pred_id": [],
+                    "true_id": [],
+                    "roll": [],
+                    "yaw": [],
+                    "pitch": [],
+                }
+
+    s = "" if store_each <= 0 else "_END"
 
     df = pd.DataFrame(results)
-    df.to_pickle(path.join(results_fol, "results_END.pkl"))
-
-
-def append_location():
-    dataset = BiwiDataset()
-    for ctr, (iden, frame) in enumerate(dataset):
-        pass
+    df.to_pickle(path.join(results_fol, "results{}.pkl".format(s)))
 
 
 def projectPoints(points):
@@ -258,22 +252,23 @@ def draw_biwi_image(image, det_data, ground_truth, match=None, iden=""):
     plt.show()
 
 
-def match_detection(det_data, ground_truth):
-    center, angle = ground_truth
+def match_detection(det_data: datum.Datum, ground_truth: tuple): 
+    center, _ = ground_truth
     pp = projectPoints(center)[0].ravel()
 
     best = (None, np.infty)
     for idx, dat in enumerate(det_data):
-        og_x = dat.region.origin[0, 0]
-        og_y = dat.region.origin[1, 0]
-        d_x = dat.region.dimensions[0, 0]
-        d_y = dat.region.dimensions[1, 0]
+        bb = dat.region.box[0]
+        og_x =  bb[0]
+        og_y = bb[1]
+        d_x = bb[2]
+        d_y = bb[3]
 
         if (
-            pp[0] < og_x
-            or pp[1] < og_y
-            or pp[0] > og_x + d_x
-            or pp[1 > og_y + d_y]
+            pp[0] < bb[0]
+            or pp[1] < bb[1]
+            or pp[0] > bb[0] + bb[2]
+            or pp[1 > bb[1] + bb[3]]
         ):
             continue
         else:

@@ -4,10 +4,10 @@ from face_recognition_ros.classifiers import default, knn, svm
 
 class Recognition:
     def __init__(self, config=None):
-        self.detector = detection.FacialDetector(config)
+        self.detector = detection.FaceDetector(config)
 
-        # self.encoder = encoding.FacialEncoder(config)
-        self.encoder = encoding_arc.EncodingArc(config)
+        # self.encoder = encoding.FaceEncoder(config)
+        self.encoder = encoding_arc.FaceEncoder(config)
 
         self.matcher = default.FaceMatcher(config)
         # self.matcher = svm.SVMMatcher(config)

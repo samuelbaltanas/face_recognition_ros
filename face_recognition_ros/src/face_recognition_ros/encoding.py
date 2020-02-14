@@ -5,7 +5,7 @@ from face_recognition_ros.third_party import facenet
 from face_recognition_ros.utils import config, files
 
 
-class FacialEncoder:
+class FaceEncoder:
     """ Facial detector using Tensorflow and Facenet """
 
     def __init__(self, conf=None):

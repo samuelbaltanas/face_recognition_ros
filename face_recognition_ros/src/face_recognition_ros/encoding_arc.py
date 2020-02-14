@@ -6,13 +6,12 @@ import numpy as np
 from mxnet import ndarray as nd
 from sklearn import preprocessing
 
-# import nnvm.compiler
-# import nnvm.testing
-import tvm
-import vta
+# import tvm
+# import vta
 from face_recognition_ros.utils import config, files
 from tvm import relay
-from tvm.contrib import graph_runtime
+
+# from tvm.contrib import graph_runtime
 
 prefix = os.path.join(
     files.PROJECT_ROOT, "data", "models", "model-r100-ii", "model"
@@ -22,13 +21,12 @@ epoch = 0
 image_size = [112, 112]
 
 
-class EncodingArc:
+class FaceEncoder:
     def __init__(self, conf=None):
         if conf is None:
             conf = config.CONFIG
 
-        # ctx = mx.cpu()
-        ctx = mx.gpu()
+        ctx = mx.gpu() if mx.context.num_gpus() > 0 else mx.cpu()
 
         sym, arg_params, aux_params = mx.model.load_checkpoint(prefix, epoch)
 
@@ -41,30 +39,39 @@ class EncodingArc:
         )
         self.model.set_params(arg_params, aux_params)
 
-    def predict(self, face_images):
+    def predict(self, face_images, batch_size=1):
+        embs = []
 
         for i, face in enumerate(face_images):
             face = cv2.cvtColor(face, cv2.COLOR_BGR2RGB)
             face = np.transpose(face, (2, 0, 1))
             face = np.expand_dims(face, 0)
-            face_images[i] = face
+            face_images[i] = face.astype("float32")
 
-        input_blob = np.vstack(face_images)
+        dataloader = mx.gluon.data.DataLoader(
+            np.vstack(face_images),
+            batch_size=batch_size,
+            last_batch="keep",
+            shuffle=False,
+        )
 
-        data = mx.nd.array(input_blob)
-        db = mx.io.DataBatch(data=(data,))
-        self.model.forward(db, is_train=False)
-        embedding = self.model.get_outputs()[0].asnumpy()
+        for faces in dataloader:
 
-        embedding = preprocessing.normalize(embedding, axis=1)
+            db = mx.io.DataBatch(data=(faces,))
+            self.model.forward(db, is_train=False)
+            embedding = self.model.get_outputs()[0].asnumpy()
+            assert embedding.shape[1] == 512
 
-        return embedding
+            embedding = preprocessing.normalize(embedding, axis=1)
+            embs.append(embedding)
+
+        return np.vstack(embs)
 
 
 def compileTVM():
     # prefix, epoch = "emore1",0
     sym, arg_params, aux_params = mx.model.load_checkpoint(prefix, epoch)
-    image_size = (112, 112)
+    image_size = 112, 112
     opt_level = 3
 
     shape_dict = {"data": (1, 3, *image_size)}

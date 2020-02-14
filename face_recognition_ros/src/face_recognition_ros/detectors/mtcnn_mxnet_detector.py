@@ -15,7 +15,7 @@ class MtcnnMxnetDetector:
         )
 
     def predict(
-        self, X: np.ndarray, threshold=0.95, extract_image=False
+        self, X: np.ndarray, threshold=0.95, extract_image=False, align=True
     ) -> datum.Datum:
         ret = self.detector.detect_face(X)
 
@@ -31,18 +31,18 @@ class MtcnnMxnetDetector:
 
             if bb[4] >= threshold:
                 dat = datum.Datum(
-                    region=region.RectangleRegion(
-                        bb[0], bb[1], bb[2] - bb[0], bb[3] - bb[1], bb[4]
-                    ),
-                    keypoints=point,
+                    region=region.BoundingBox(bb[:4], bb[4]), keypoints=point,
                 )
 
                 if extract_image:
-                    point = point.reshape((2, 5)).T
-                    aligned = align_mtcnn.align(
-                        X, bb, point, image_size="112,112"
-                    )
+                    if align:
+                        point = point.reshape((2, 5)).T
+                    elif extract_image:
+                        point = None
+
+                    aligned = align_mtcnn.align(X, bb, point, image_size="112,112")
                     dat.image = aligned
+
                 data.append(dat)
 
         return data

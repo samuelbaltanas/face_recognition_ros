@@ -48,7 +48,7 @@ def _load_from_file(path):
 
     try:
         with open(FULL_PATH, "r") as f:
-            conf = yaml.load(f)
+            conf = yaml.safe_load(f)
     except Exception:
         logging.error("Configuration file cannot be loaded.")
         sys.exit(-1)

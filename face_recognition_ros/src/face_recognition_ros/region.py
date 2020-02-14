@@ -3,64 +3,55 @@ import cv2
 import numpy as np
 
 
-class RectangleRegion:
-    def __init__(
-        self, left_x=0.0, top_y=0.0, width=0.0, height=0.0, detection_score=0.0
-    ):
-        self.origin = np.array([[left_x], [top_y]], dtype=float)
-        self.dimensions = np.array([[width], [height]], dtype=float)
-        self.detection_score = float(detection_score)
+class BoundingBox:
+    """Bounding box with format: x0, y0, x1, y1
 
-    def extract_face(self, image, shape=None):
-        if shape is None:
-            shape = (160, 160)
+    """
+
+    def __init__(self, box: np.ndarray, score: float = 0.0):
+        if isinstance(box, list) and len(box) == 4:
+            box = np.array(box).reshape(1, 4)
+        elif isinstance(box, np.ndarray):
+            box = box.reshape(1, 4)
+        else:
+            raise Exception("Expected list or ndarray of lenght 4")
+
+        self.box = box
+        self.score = score
+
+    def extract_face(self, image, shape):
 
         face = image[
-            max(int(self.origin[1, 0]), 0) : min(
-                int(self.origin[1, 0] + self.dimensions[1, 0]), image.shape[0]
-            ),
-            max(int(self.origin[0, 0]), 0) : min(
-                int(self.origin[0, 0] + self.dimensions[0, 0]), image.shape[1]
-            ),
+            max(self.box[:, 1], 0) : min(self.box[:, 3], image.shape[0]),
+            max(self.box[:, 0], 0) : min(self.box[:, 2], image.shape[1]),
         ]
-        face = cv2.resize(face, shape, interpolation=cv2.INTER_AREA)
+        face = cv2.resize(face, shape)
 
         return face
 
-    def to_bounding_box(self):
-        res = np.tile(self.origin.T, (4, 1))  # [topl, topr, botl, botr]
-
-        res[1, 0] += self.dimensions[0, 0]
-        res[3, 1] += self.dimensions[1, 0]
-        res[2] += self.dimensions[:, 0]
-
-        return res
-
     def to_cvbox(self, margin=0.0, score=False):
         cvbox = [
-            self.origin[0, 0],
-            self.origin[1, 0],
-            self.dimensions[0, 0],
-            self.dimensions[1, 0],
+            self.box[:, 0],
+            self.box[:, 1],
+            self.box[:, 2] - self.box[:, 0],
+            self.box[:, 3] - self.box[:, 1],
         ]
         if margin > 0.0:
-            cvbox[0] -= self.dimensions[0, 0] * margin / 2
-            cvbox[1] -= self.dimensions[1, 0] * margin / 2
-            cvbox[2] += self.dimensions[0, 0] * margin / 2
-            cvbox[3] += self.dimensions[1, 0] * margin / 2
+            cvbox[0] -= cvbox[2] * margin / 2
+            cvbox[1] -= cvbox[3] * margin / 2
+            cvbox[2] += cvbox[2] * margin / 2
+            cvbox[3] += cvbox[3] * margin / 2
         if score:
-            cvbox.append(self.detection_score)
+            cvbox.append(self.score)
 
         return tuple(cvbox)
 
     def intersect(self, x):
-        end1 = self.origin + self.dimensions
-        end2 = x.origin + x.dimensions
-
         ov = (
-            max(self.origin[0, 0], x.origin[0, 0]) - min(end1[0, 0], end2[0, 0])
+            max(self.box[:, 0], x.box[:, 0]) - min(self.box[:, 2], x.box[:, 2])
         ) * (
-            max(self.origin[1, 0], x.origin[1, 0]) - min(end1[1, 0], end2[1, 0])
+            max(self.box[:, 1], x.box[:, 1])
+            - min(self.box[:, 3], self.box[:, 3])
         )
 
         return ov / (self.size() + x.size() - ov)
@@ -68,8 +59,8 @@ class RectangleRegion:
     def draw(
         self, image, label=None, color=(0, 255, 0), thickness=3, font_scale=1
     ):
-        bb = self.to_bounding_box()
-        bb = bb.reshape((-1, 1, 2))
+        b = self.box[0]
+        bb = [b[:2], [b[0], b[3]], b[2:], [b[2], b[1]]]
 
         if label is None or label == "":
             color = (255, 0, 0)
@@ -85,14 +76,7 @@ class RectangleRegion:
             image = cv2.putText(
                 image,
                 label,
-                (
-                    int(self.origin[0, 0]),
-                    int(
-                        self.origin[1, 0]
-                        + self.dimensions[1, 0]
-                        + 30 * font_scale
-                    ),
-                ),
+                (int(self.box[:, 0]), int(self.box[:, 3] + 30 * font_scale),),
                 fontFace=cv2.FONT_HERSHEY_SIMPLEX,
                 fontScale=font_scale,
                 color=color,
@@ -102,37 +86,19 @@ class RectangleRegion:
         return image
 
     def __repr__(self):
-        return "{} {} {} {} {}".format(
-            self.origin[0, 0],
-            self.origin[1, 0],
-            self.dimensions[0, 0],
-            self.dimensions[1, 0],
-            self.detection_score,
-        )
-
-    def __str__(self):
-        return "\n\t".join(
-            [
-                "[rectangle]",
-                "origin: ({}, {})".format(self.origin[0, 0], self.origin[1, 0]),
-                "size: ({}, {})".format(
-                    self.dimensions[0, 0], self.dimensions[1, 0]
-                ),
-                "score: {}".format(self.detection_score),
-            ]
-        )
+        return "{}, {}".format(self.box, self.score)
 
     def is_empty(self):
-        return np.any(self.dimensions == 0.0)
+        return np.any(self.box[:, 2:] == 0.0)
 
     def size(self):
-        return self.dimensions[0, 0] * self.dimensions[1, 0]
+        return self.box[:, 2] * self.box[:, 3]
 
     def offset(self, img_center):
         return np.vstack(
             [
-                self.origin[0, 0] + self.dimensions[0, 0] / 2 - img_center[1],
-                self.origin[1, 0] + self.dimensions[1, 0] / 2 - img_center[0],
+                self.box[:, ::2].mean() - img_center[:, 0],
+                self.box[:, 1::2].mean() - img_center[:, 1],
             ]
         )
 

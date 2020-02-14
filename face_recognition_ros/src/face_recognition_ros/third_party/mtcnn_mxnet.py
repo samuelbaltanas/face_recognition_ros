@@ -34,7 +34,7 @@ class MtcnnDetector(object):
         factor=0.709,
         num_worker=1,
         accurate_landmark=False,
-        ctx=mx.cpu(),
+        ctx=mx.gpu(),
     ):
         """
             Initialize the detector

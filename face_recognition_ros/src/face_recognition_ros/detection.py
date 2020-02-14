@@ -16,11 +16,11 @@ METHODS = {
     # "mtcnn": mtcnn_face_detector.MtcnnFaceDetector,
     "mtcnn": mtcnn_mxnet_detector.MtcnnMxnetDetector,
     # "openpose": openpose_face_detector.FacialDetector,
-    "opencv": opencv_face_detector.OpencvFaceDetector,
+    # "opencv": opencv_face_detector.OpencvFaceDetector,
 }
 
 
-class FacialDetector:
+class FaceDetector:
     def __init__(self, method=None, conf=None):
 
         # Parse config
@@ -36,26 +36,6 @@ class FacialDetector:
         self.detector = METHODS[method](method_conf)
 
     def predict(
-        self, X: np.ndarray, threshold=0.95, extract_image=False
+        self, X: np.ndarray, threshold=0.95, extract_image=False, **kwargs
     ) -> datum.Datum:
-        return self.detector.predict(X, threshold, extract_image)
-
-
-"""
-    def extract_region(self, image, threshold=0.9):
-        return self.detector.extract_region(image, threshold)
-
-    def extract_images(self, image, regions=None, threshold=0.9):
-        return self.detector.extract_images(image, regions, threshold)
-
-    def extract_datum(self, image, threshold=0.9):
-        regions = self.detector.extract_region(image, threshold)
-        images = self.detector.extract_images(image, regions)
-
-        data = [
-            datum.Datum(region=reg, image=im)
-            for reg, im in zip(regions, images)
-        ]
-
-        return data
-"""
+        return self.detector.predict(X, threshold, extract_image, **kwargs)

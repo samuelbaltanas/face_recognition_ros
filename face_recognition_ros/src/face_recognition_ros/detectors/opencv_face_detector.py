@@ -27,7 +27,7 @@ class OpencvFaceDetector(base_face_detector.BaseFaceDetector):
 
         for i in range(detections.shape[0]):
             if detections[i, 2] >= self.threshold:
-                reg = region.RectangleRegion(
+                reg = region.BoundingBox(
                     detections[i, 3] * DIMS[1] - self.margin / 2,
                     detections[i, 4] * DIMS[0] - self.margin / 2,
                     (detections[i, 5] - detections[i, 3]) * DIMS[1]
