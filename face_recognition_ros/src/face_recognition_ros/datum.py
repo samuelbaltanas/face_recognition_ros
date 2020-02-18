@@ -8,22 +8,22 @@ from face_recognition_ros import region as reg
 class Datum:
     def __init__(
         self,
-        region=None,
-        image=None,
+        region: typing.Optional[reg.BoundingBox] = None,
+        image: typing.Optional[np.ndarray] = None,
         keypoints=None,
-        embedding=None,
-        identity=None,
+        embedding: typing.Optional[np.ndarray] = None,
+        identity: typing.Optional[str] = None,
         match_score=4.0,
     ):
         # DETECTION
-        self.region = region  # type: typing.Optional[reg.RectangleRegion]
-        self.image = image  # type: typing.Optional[np.ndarray]
+        self.region = region
+        self.image = image
         self.keypoints = keypoints
         # RECOGNITION
-        self.embedding = embedding  # type: typing.Optional[np.ndarray]
+        self.embedding = embedding
         # MATCHING
-        self.identity = identity  # type: typing.Optional[str]
-        self.match_score = match_score  # type: float
+        self.identity = identity
+        self.match_score = match_score
 
     def __str__(self):
         return "\n".join(

@@ -40,7 +40,9 @@ class MtcnnMxnetDetector:
                     elif extract_image:
                         point = None
 
-                    aligned = align_mtcnn.align(X, bb, point, image_size="112,112")
+                    aligned = align_mtcnn.align(
+                        X, bb, point, image_size="112,112"
+                    )
                     dat.image = aligned
 
                 data.append(dat)

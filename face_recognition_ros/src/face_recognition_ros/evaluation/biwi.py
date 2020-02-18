@@ -5,12 +5,12 @@ import itertools
 import os
 import typing
 from os import path
-import tqdm
 
 import cv2
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
+from tqdm.autonotebook import tqdm
 
 from face_recognition_ros import datum, detection, encoding_arc, recognition
 from face_recognition_ros.utils import config
@@ -73,7 +73,7 @@ def create_biwi_db(out_path):
 
         image = cv2.imread(im_path)
 
-        data = detector.predict(image, extract_image=True)
+        data = detector.predict(image, extract_image=True, align=False)
         face_match = match_detection(data, (center3D, angle))
         embedding = encoder.predict([data[face_match].image])
 
@@ -111,9 +111,11 @@ def eval_on_biwi(store_file, results_fol, store_each=-1, overwrite=False):
         "pitch": [],
     }
 
-    with tqdm(15700) as pbar:
+    with tqdm(total=15678) as pbar:
         # Eval
-        for ctr, (iden, frame) in itertools.islice(enumerate(dataset), start, None):
+        for ctr, (iden, frame) in itertools.islice(
+            enumerate(dataset), start, None
+        ):
             image_path, (center3D, angle) = dataset[iden, frame]
             image = cv2.imread(image_path)
             faces = face_rec.recognize(image)  # type: typing.List[datum.Datum]
@@ -138,7 +140,9 @@ def eval_on_biwi(store_file, results_fol, store_each=-1, overwrite=False):
 
             if store_each > 0 and ctr % store_each == store_each - 1:
                 df = pd.DataFrame(results)
-                df.to_pickle(path.join(results_fol, "results_{}.pkl".format(ctr)))
+                df.to_pickle(
+                    path.join(results_fol, "results_{}.pkl".format(ctr))
+                )
                 results = {
                     "image_id": [],
                     "image_frame": [],
@@ -234,10 +238,11 @@ def draw_axis(img, angle, center=None, size=40):
     return img
 
 
-def draw_biwi_image(image, det_data, ground_truth, match=None, iden=""):
+def draw_biwi_image(
+    image, det_data: typing.List[datum.Datum], ground_truth, match=None, iden=""
+):
     plt.figure()
     center, angle = ground_truth
-
     for idx, dat in enumerate(det_data):
         if idx == match:
             dat.identity = str(iden)
@@ -252,27 +257,18 @@ def draw_biwi_image(image, det_data, ground_truth, match=None, iden=""):
     plt.show()
 
 
-def match_detection(det_data: datum.Datum, ground_truth: tuple): 
+def match_detection(det_data: datum.Datum, ground_truth: tuple):
     center, _ = ground_truth
     pp = projectPoints(center)[0].ravel()
 
     best = (None, np.infty)
     for idx, dat in enumerate(det_data):
         bb = dat.region.box[0]
-        og_x =  bb[0]
-        og_y = bb[1]
-        d_x = bb[2]
-        d_y = bb[3]
 
-        if (
-            pp[0] < bb[0]
-            or pp[1] < bb[1]
-            or pp[0] > bb[0] + bb[2]
-            or pp[1 > bb[1] + bb[3]]
-        ):
+        if pp[0] < bb[0] or pp[1] < bb[1] or pp[0] > bb[2] or pp[1] > bb[3]:
             continue
         else:
-            center_bb = np.array((og_x + d_x / 2, og_y + d_y / 2))
+            center_bb = np.array((bb[0] + bb[2] / 2, bb[1] + bb[3] / 2))
             dist = np.sqrt(
                 (pp[0] - center_bb[0]) ** 2 + (pp[1] - center_bb[1]) ** 2
             )

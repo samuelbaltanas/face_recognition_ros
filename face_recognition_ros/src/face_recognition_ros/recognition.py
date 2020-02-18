@@ -1,4 +1,4 @@
-from face_recognition_ros import datum, detection, encoding, encoding_arc
+from face_recognition_ros import datum, detection, encoding_arc_tvm
 from face_recognition_ros.classifiers import default, knn, svm
 
 
@@ -7,14 +7,14 @@ class Recognition:
         self.detector = detection.FaceDetector(config)
 
         # self.encoder = encoding.FaceEncoder(config)
-        self.encoder = encoding_arc.FaceEncoder(config)
+        self.encoder = encoding_arc_tvm.FaceEncoder(config)
 
         self.matcher = default.FaceMatcher(config)
         # self.matcher = svm.SVMMatcher(config)
         # self.matcher = knn.KNNMatcher(config)
 
     def recognize(self, image):
-        faces = self.detector.predict(image, extract_image=True)
+        faces = self.detector.predict(image, extract_image=True, align=False)
         if len(faces) > 0:
             face_images = [face.image for face in faces]
 

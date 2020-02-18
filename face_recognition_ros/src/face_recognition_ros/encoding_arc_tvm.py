@@ -1,10 +1,9 @@
 import os
-import sys
+from os import path
 
 import cv2
 import mxnet as mx
 import numpy as np
-from mxnet import ndarray as nd
 from sklearn import preprocessing
 
 import tvm
@@ -12,15 +11,17 @@ import tvm
 # import vta
 from face_recognition_ros.utils import config, files
 from tvm import relay
+from tvm.contrib import graph_runtime
 
 # from tvm.contrib import graph_runtime
 
 prefix = os.path.join(
-    files.PROJECT_ROOT, "data", "models", "model-r100-ii", "model"
+    files.PROJECT_ROOT, "data", "models", "tvm-model-r100-ii"
 )
 # prefix = os.path.join(files.PROJECT_ROOT, "data", "models", "model-y1-test2", "model")
 epoch = 0
 image_size = [112, 112]
+shape = {"data": (1, 3, 112, 112)}
 
 
 class FaceEncoder:
@@ -28,40 +29,25 @@ class FaceEncoder:
         if conf is None:
             conf = config.CONFIG
 
-        ctx = mx.gpu() if mx.context.num_gpus() > 0 else mx.cpu()
+        ctx = tvm.gpu() if mx.context.num_gpus() > 0 else tvm.cpu()
 
-        sym, arg_params, aux_params = mx.model.load_checkpoint(prefix, epoch)
+        loaded_json = open(path.join(prefix, "deploy_graph.json")).read()
+        loaded_lib = tvm.runtime.load_module(path.join(prefix, "deploy_lib.so"))
+        loaded_params = bytearray(open(path.join(prefix, "deploy_param.params"), "rb").read())
 
-        all_layers = sym.get_internals()
-        sym = all_layers["fc1_output"]
-        self.model = mx.mod.Module(symbol=sym, context=ctx, label_names=None)
-
-        self.model.bind(
-            data_shapes=[("data", (1, 3, image_size[0], image_size[1]))]
-        )
-        self.model.set_params(arg_params, aux_params)
+        self.module = graph_runtime.create(loaded_json, loaded_lib, ctx)
+        self.module.load_params(loaded_params)
 
     def predict(self, face_images, batch_size=1):
         embs = []
 
-        for i, face in enumerate(face_images):
+        for face in face_images:
             face = cv2.cvtColor(face, cv2.COLOR_BGR2RGB)
             face = np.transpose(face, (2, 0, 1))
             face = np.expand_dims(face, 0)
-            face_images[i] = face.astype("float32")
 
-        dataloader = mx.gluon.data.DataLoader(
-            np.vstack(face_images),
-            batch_size=batch_size,
-            last_batch="keep",
-            shuffle=False,
-        )
-
-        for faces in dataloader:
-
-            db = mx.io.DataBatch(data=(faces,))
-            self.model.forward(db, is_train=False)
-            embedding = self.model.get_outputs()[0].asnumpy()
+            self.module.run(data=face)
+            embedding = self.module.get_output(0).asnumpy()
             assert embedding.shape[1] == 512
 
             embedding = preprocessing.normalize(embedding, axis=1)
