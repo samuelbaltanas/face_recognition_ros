@@ -14,7 +14,7 @@ class Recognition:
         # self.matcher = knn.KNNMatcher(config)
 
     def recognize(self, image):
-        faces = self.detector.predict(image, extract_image=True, align=False)
+        faces = self.detector.predict(image, extract_image=True, align=True)
         if len(faces) > 0:
             face_images = [face.image for face in faces]
 

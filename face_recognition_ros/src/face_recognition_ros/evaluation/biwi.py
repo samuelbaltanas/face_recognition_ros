@@ -10,7 +10,7 @@ import cv2
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
-from tqdm.autonotebook import tqdm
+from tqdm.autonotebook import tqdm, trange
 
 from face_recognition_ros import datum, detection, encoding_arc, recognition
 from face_recognition_ros.utils import config
@@ -24,9 +24,84 @@ CAMERA_MATRIX = np.eye(3)
 TVEC = np.zeros((3, 1))
 DIST_COEFFS = (0, 0, 0, 0)
 
+iden = np.array(
+    [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F05",
+        "F06",
+        "M01",
+        "M02",
+        "M03",
+        "M04",
+        "M05",
+        "M06",
+        "M07",
+        "M08",
+        "F03",
+        "M09",
+        "M10",
+        "F05",
+        "M11",
+        "M12",
+        "F02",
+        "M01",
+        "M13",
+        "M14",
+    ],
+    dtype=str,
+)
+sex = np.array(
+    [
+        "F",
+        "F",
+        "F",
+        "F",
+        "F",
+        "F",
+        "M",
+        "M",
+        "M",
+        "M",
+        "M",
+        "M",
+        "M",
+        "M",
+        "M",
+        "M",
+        "M",
+        "F",
+        "M",
+        "M",
+        "F",
+        "M",
+        "M",
+        "M",
+    ],
+    dtype=str,
+)
 
-def load_identities(path=path.join(BIWI_DIR, "dataset_info.csv")):
-    cinv = {"folder": str, "iden": str, "center_frame": int, "sex": str}
+repeated = {
+    15: 3, 18: 5, 21: 2, 22: 7
+    }
+
+
+class Angle(typing.NamedTuple):
+    roll: float
+    pitch: float
+    yaw: float
+
+
+class BiwiDatum(typing.NamedTuple):
+    path: str
+    center3d: np.ndarray
+    angle: Angle
+
+
+def load_identities(path=path.join(BIWI_DIR, "dataset_centered.csv")):
+    cinv = {"folder": str, "iden": str, "frame": int, "sex": str}
     return pd.read_csv(path, converters=cinv)
 
 
@@ -36,7 +111,7 @@ def seek_min_angles():
     dataset = BiwiDataset()
 
     for iden, frame in dataset:
-        _, (_, angle) = dataset[iden, frame]
+        angle = dataset[iden, frame].angle
         idx = int(iden) - 1
         abs_angle = np.abs(angle[0]) + np.abs(angle[1]) + np.abs(angle[2])
 
@@ -47,7 +122,7 @@ def seek_min_angles():
     return min_frame
 
 
-def create_biwi_db(out_path):
+def create_biwi_db(csv_path: str, out_path: str):
     dataset = BiwiDataset()
 
     # Processing pipeline
@@ -59,22 +134,23 @@ def create_biwi_db(out_path):
     labels = []
     embeddings = []
 
-    aux_info = load_identities()
+    aux_info = load_identities(csv_path)
 
     # Create faces database (MIN_ANGLES)
-    for idx in range(len(aux_info)):
+    for idx in trange(len(aux_info)):
         label = aux_info.iden[idx]
         if label in labels:
             continue
 
         iden = aux_info.folder[idx]
-        frame = aux_info.center_frame[idx]
-        im_path, (center3D, angle) = dataset[int(iden), frame]
+        frame = aux_info.frame[idx]
+        # im_path, (center3D, angle) = dataset[int(iden), frame]
+        dat = dataset[int(iden), frame]
 
-        image = cv2.imread(im_path)
+        image = cv2.imread(dat.path)
 
-        data = detector.predict(image, extract_image=True, align=False)
-        face_match = match_detection(data, (center3D, angle))
+        data = detector.predict(image, extract_image=True, align=True)
+        face_match = match_detection(data, (dat.center3d, dat.angle))
         embedding = encoder.predict([data[face_match].image])
 
         labels.append(label)
@@ -116,10 +192,10 @@ def eval_on_biwi(store_file, results_fol, store_each=-1, overwrite=False):
         for ctr, (iden, frame) in itertools.islice(
             enumerate(dataset), start, None
         ):
-            image_path, (center3D, angle) = dataset[iden, frame]
-            image = cv2.imread(image_path)
+            dat = dataset[iden, frame]
+            image = cv2.imread(dat.path)
             faces = face_rec.recognize(image)  # type: typing.List[datum.Datum]
-            match = match_detection(faces, (center3D, angle))
+            match = match_detection(faces, (dat.center3d, dat.angle))
 
             if match is None:
                 results["score"].append(1.0)
@@ -132,9 +208,9 @@ def eval_on_biwi(store_file, results_fol, store_each=-1, overwrite=False):
             results["image_id"].append(iden)
             results["image_frame"].append(frame)
 
-            results["roll"].append(angle[0])
-            results["pitch"].append(angle[1])
-            results["yaw"].append(angle[2])
+            results["roll"].append(dat.angle[0])
+            results["pitch"].append(dat.angle[1])
+            results["yaw"].append(dat.angle[2])
 
             pbar.update(1)
 
@@ -195,7 +271,7 @@ def angle_from_matrix(rotation):
     )
     pitch = np.arctan2(r[2, 1], r[2, 2]) * 180 / np.pi
 
-    return (roll, pitch, yaw)
+    return Angle(roll, pitch, yaw)
 
 
 def draw_axis(img, angle, center=None, size=40):
@@ -281,7 +357,7 @@ class BiwiDataset:
     def __init__(self, path=BIWI_DIR):
         self._dir = path
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: typing.Tuple[int, int]) -> BiwiDatum:
         individual, image = key
         folder = path.join(self._dir, "{:02d}".format(individual))
 
@@ -291,7 +367,9 @@ class BiwiDataset:
         if not path.isfile(image_file):
             raise IndexError("File {} does not exist.".format(image_file))
 
-        return image_file, read_ground_truth(pose_file)
+        center3d, angle = read_ground_truth(pose_file)
+
+        return BiwiDatum(image_file, center3d, angle)
 
     def __iter__(self):
         for identifier in range(1, 25):
@@ -303,6 +381,35 @@ class BiwiDataset:
             ):
                 frame = int(f.split("_")[1])
                 yield identifier, frame
+
+    def as_pandas(self):
+        d = {
+            "identity": [],
+            "frame": [],
+            "center_x": [],
+            "center_y": [],
+            "center_z": [],
+            "roll": [],
+            "pitch": [],
+            "yaw": [],
+        }
+        with tqdm(total=self.__len__) as tq:
+            for iden, frame in self:
+                dat = self[iden, frame]
+                d["identity"].append(iden)
+                d["frame"].append(frame)
+                d["center_x"].append(dat.center3d[0])
+                d["center_y"].append(dat.center3d[1])
+                d["center_z"].append(dat.center3d[2])
+                d["roll"].append(dat.angle.roll)
+                d["pitch"].append(dat.angle.pitch)
+                d["yaw"].append(dat.angle.yaw)
+                tq.update(1)
+
+        return pd.DataFrame(d)
+
+    def __len__(self):
+        return 15678
 
 
 if __name__ == "__main__":

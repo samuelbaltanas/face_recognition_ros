@@ -15,9 +15,7 @@ from tvm.contrib import graph_runtime
 
 # from tvm.contrib import graph_runtime
 
-prefix = os.path.join(
-    files.PROJECT_ROOT, "data", "models", "tvm-model-r100-ii"
-)
+prefix = os.path.join(files.PROJECT_ROOT, "data", "models", "tvm-model-r100-ii")
 # prefix = os.path.join(files.PROJECT_ROOT, "data", "models", "model-y1-test2", "model")
 epoch = 0
 image_size = [112, 112]
@@ -33,7 +31,9 @@ class FaceEncoder:
 
         loaded_json = open(path.join(prefix, "deploy_graph.json")).read()
         loaded_lib = tvm.runtime.load_module(path.join(prefix, "deploy_lib.so"))
-        loaded_params = bytearray(open(path.join(prefix, "deploy_param.params"), "rb").read())
+        loaded_params = bytearray(
+            open(path.join(prefix, "deploy_param.params"), "rb").read()
+        )
 
         self.module = graph_runtime.create(loaded_json, loaded_lib, ctx)
         self.module.load_params(loaded_params)
