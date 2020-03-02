@@ -13,14 +13,10 @@ from tqdm.autonotebook import tqdm
 
 from face_recognition_ros import datum
 
+from .aux import project_points
+
 # Default paths to the dataset
 BIWI_DIR = "/home/sam/Datasets/data/hpdb/"
-
-# Configuration of the depth camera in the BIWI dataset
-RVEC = np.array([[517.679, 0, 320], [0, 517.679, 240.5], [0, 0, 1]])
-CAMERA_MATRIX = np.eye(3)
-TVEC = np.zeros((3, 1))
-DIST_COEFFS = (0, 0, 0, 0)
 
 
 integer = typing.Union[int, np.integer]
@@ -72,7 +68,7 @@ class BiwiDatum(typing.NamedTuple):
             draw_axis(image, self.angle, center_2d)
 
         plt.imshow(image)
-        projected = projectPoints(self.center3d)[0].ravel()
+        projected = project_points(self.center3d)[0].ravel()
         plt.scatter(projected[0], projected[1], color="magenta")
         plt.show()
 
@@ -97,13 +93,6 @@ def seek_min_angles():
             min_angles[idx] = abs_angle
 
     return min_frame
-
-
-def projectPoints(points):
-    """ Convenience method in place of cv2.projectPoints.
-        It uses the hardcoded parameters of the BIWI dataset's camera.
-    """
-    return cv2.projectPoints(points, RVEC, TVEC, CAMERA_MATRIX, DIST_COEFFS)[0]
 
 
 def read_ground_truth(fd):
@@ -196,7 +185,7 @@ def match_detection(
 
     """
     center, _ = ground_truth
-    projected = projectPoints(center)[0].ravel()
+    projected = project_points(center)[0].ravel()
 
     best = (None, np.infty)
     for idx, dat in enumerate(det_data):

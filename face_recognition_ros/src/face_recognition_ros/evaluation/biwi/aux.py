@@ -1,3 +1,4 @@
+import cv2
 import numpy as np
 
 # DONE Move harcoded values to auxiliary
@@ -61,3 +62,16 @@ FEATURE_SEX = np.array(
 )
 
 REPEATED = {15: 3, 18: 5, 21: 2, 22: 7}
+
+# Configuration of the depth camera in the BIWI dataset
+RVEC = np.array([[517.679, 0, 320], [0, 517.679, 240.5], [0, 0, 1]])
+CAMERA_MATRIX = np.eye(3)
+TVEC = np.zeros((3, 1))
+DIST_COEFFS = 0, 0, 0, 0
+
+
+def project_points(points):
+    """ Convenience method in place of cv2.projectPoints.
+        It uses the hardcoded parameters of the BIWI dataset's camera.
+    """
+    return cv2.projectPoints(points, RVEC, TVEC, CAMERA_MATRIX, DIST_COEFFS)[0]
