@@ -29,9 +29,7 @@ def list_models(installed=False) -> List[str]:
 
     if installed:
         droplist = [
-            i
-            for i in models.keys()
-            if not path.exists(path.join(__MODEL_DIR, i))
+            i for i in models.keys() if not path.exists(path.join(__MODEL_DIR, i))
         ]
         for i in droplist:
             models.pop(i)

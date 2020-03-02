@@ -31,9 +31,7 @@ class DlibDetector(base_face_detector.BaseFaceDetector):
         ]
         return regions, raw_detection
 
-    def extract_images(
-        self, image, regions=None, raw_detection=None, align=True
-    ):
+    def extract_images(self, image, regions=None, raw_detection=None, align=True):
         if raw_detection is None:
             regions, raw_detection = self.face_det(image, 0)
 

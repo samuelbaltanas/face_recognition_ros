@@ -158,9 +158,7 @@ class Network(object):
             tf.nn.conv2d(i, k, [1, s_h, s_w, 1], padding=padding)
 
         with tf.variable_scope(name) as scope:
-            kernel = self.make_var(
-                "weights", shape=[k_h, k_w, c_i // group, c_o]
-            )
+            kernel = self.make_var("weights", shape=[k_h, k_w, c_i // group, c_o])
             # This is the common-case. Convolve the input without any further complications.
             output = convolve(inp, kernel)
             # Add the biases
@@ -228,9 +226,7 @@ class Network(object):
 class PNet(Network):
     def setup(self):
         (
-            self.feed(
-                "data"
-            )  # pylint: disable=no-value-for-parameter, no-member
+            self.feed("data")  # pylint: disable=no-value-for-parameter, no-member
             .conv(3, 3, 10, 1, 1, padding="VALID", relu=False, name="conv1")
             .prelu(name="PReLU1")
             .max_pool(2, 2, 2, 2, name="pool1")
@@ -252,9 +248,7 @@ class PNet(Network):
 class RNet(Network):
     def setup(self):
         (
-            self.feed(
-                "data"
-            )  # pylint: disable=no-value-for-parameter, no-member
+            self.feed("data")  # pylint: disable=no-value-for-parameter, no-member
             .conv(3, 3, 28, 1, 1, padding="VALID", relu=False, name="conv1")
             .prelu(name="prelu1")
             .max_pool(3, 3, 2, 2, name="pool1")
@@ -279,9 +273,7 @@ class RNet(Network):
 class ONet(Network):
     def setup(self):
         (
-            self.feed(
-                "data"
-            )  # pylint: disable=no-value-for-parameter, no-member
+            self.feed("data")  # pylint: disable=no-value-for-parameter, no-member
             .conv(3, 3, 32, 1, 1, padding="VALID", relu=False, name="conv1")
             .prelu(name="prelu1")
             .max_pool(3, 3, 2, 2, name="pool1")
@@ -331,23 +323,17 @@ def create_mtcnn(sess, model_path):
 
     def pnet_fun(img):
         sess.run(
-            ("pnet/conv4-2/BiasAdd:0", "pnet/prob1:0"),
-            feed_dict={"pnet/input:0": img},
+            ("pnet/conv4-2/BiasAdd:0", "pnet/prob1:0"), feed_dict={"pnet/input:0": img},
         )
 
     def rnet_fun(img):
         sess.run(
-            ("rnet/conv5-2/conv5-2:0", "rnet/prob1:0"),
-            feed_dict={"rnet/input:0": img},
+            ("rnet/conv5-2/conv5-2:0", "rnet/prob1:0"), feed_dict={"rnet/input:0": img},
         )
 
     def onet_fun(img):
         sess.run(
-            (
-                "onet/conv6-2/conv6-2:0",
-                "onet/conv6-3/conv6-3:0",
-                "onet/prob1:0",
-            ),
+            ("onet/conv6-2/conv6-2:0", "onet/conv6-3/conv6-3:0", "onet/prob1:0",),
             feed_dict={"onet/input:0": img},
         )
 
@@ -390,10 +376,7 @@ def detect_face(img, minsize, pnet, rnet, onet, threshold, factor):
         out1 = np.transpose(out[1], (0, 2, 1, 3))
 
         boxes, _ = generateBoundingBox(
-            out1[0, :, :, 1].copy(),
-            out0[0, :, :, :].copy(),
-            scale,
-            threshold[0],
+            out1[0, :, :, 1].copy(), out0[0, :, :, :].copy(), scale, threshold[0],
         )
 
         # inter-scale nms
@@ -412,14 +395,10 @@ def detect_face(img, minsize, pnet, rnet, onet, threshold, factor):
         qq2 = total_boxes[:, 1] + total_boxes[:, 6] * regh
         qq3 = total_boxes[:, 2] + total_boxes[:, 7] * regw
         qq4 = total_boxes[:, 3] + total_boxes[:, 8] * regh
-        total_boxes = np.transpose(
-            np.vstack([qq1, qq2, qq3, qq4, total_boxes[:, 4]])
-        )
+        total_boxes = np.transpose(np.vstack([qq1, qq2, qq3, qq4, total_boxes[:, 4]]))
         total_boxes = rerec(total_boxes.copy())
         total_boxes[:, 0:4] = np.fix(total_boxes[:, 0:4]).astype(np.int32)
-        dy, edy, dx, edx, y, ey, x, ex, tmpw, tmph = pad(
-            total_boxes.copy(), w, h
-        )
+        dy, edy, dx, edx, y, ey, x, ex, tmpw, tmph = pad(total_boxes.copy(), w, h)
 
     numbox = total_boxes.shape[0]
     if numbox > 0:
@@ -447,10 +426,7 @@ def detect_face(img, minsize, pnet, rnet, onet, threshold, factor):
         score = out1[1, :]
         ipass = np.where(score > threshold[1])
         total_boxes = np.hstack(
-            [
-                total_boxes[ipass[0], 0:4].copy(),
-                np.expand_dims(score[ipass].copy(), 1),
-            ]
+            [total_boxes[ipass[0], 0:4].copy(), np.expand_dims(score[ipass].copy(), 1),]
         )
         mv = out0[:, ipass[0]]
         if total_boxes.shape[0] > 0:
@@ -463,9 +439,7 @@ def detect_face(img, minsize, pnet, rnet, onet, threshold, factor):
     if numbox > 0:
         # third stage
         total_boxes = np.fix(total_boxes).astype(np.int32)
-        dy, edy, dx, edx, y, ey, x, ex, tmpw, tmph = pad(
-            total_boxes.copy(), w, h
-        )
+        dy, edy, dx, edx, y, ey, x, ex, tmpw, tmph = pad(total_boxes.copy(), w, h)
         tempimg = np.zeros((48, 48, 3, numbox))
         for k in range(0, numbox):
             tmp = np.zeros((int(tmph[k]), int(tmpw[k]), 3))
@@ -492,19 +466,14 @@ def detect_face(img, minsize, pnet, rnet, onet, threshold, factor):
         ipass = np.where(score > threshold[2])
         points = points[:, ipass[0]]
         total_boxes = np.hstack(
-            [
-                total_boxes[ipass[0], 0:4].copy(),
-                np.expand_dims(score[ipass].copy(), 1),
-            ]
+            [total_boxes[ipass[0], 0:4].copy(), np.expand_dims(score[ipass].copy(), 1),]
         )
         mv = out0[:, ipass[0]]
 
         w = total_boxes[:, 2] - total_boxes[:, 0] + 1
         h = total_boxes[:, 3] - total_boxes[:, 1] + 1
         points[0:5, :] = (
-            np.tile(w, (5, 1)) * points[0:5, :]
-            + np.tile(total_boxes[:, 0], (5, 1))
-            - 1
+            np.tile(w, (5, 1)) * points[0:5, :] + np.tile(total_boxes[:, 0], (5, 1)) - 1
         )
         points[5:10, :] = (
             np.tile(h, (5, 1)) * points[5:10, :]
@@ -603,9 +572,7 @@ def bulk_detect_face(
             if boxes.size > 0 and pick.size > 0:
                 boxes = boxes[pick, :]
                 images_with_boxes[image_index]["total_boxes"] = np.append(
-                    images_with_boxes[image_index]["total_boxes"],
-                    boxes,
-                    axis=0,
+                    images_with_boxes[image_index]["total_boxes"], boxes, axis=0,
                 )
 
     for index, image_obj in enumerate(images_with_boxes):
@@ -615,28 +582,12 @@ def bulk_detect_face(
             w = images[index].shape[1]
             pick = nms(image_obj["total_boxes"].copy(), 0.7, "Union")
             image_obj["total_boxes"] = image_obj["total_boxes"][pick, :]
-            regw = (
-                image_obj["total_boxes"][:, 2] - image_obj["total_boxes"][:, 0]
-            )
-            regh = (
-                image_obj["total_boxes"][:, 3] - image_obj["total_boxes"][:, 1]
-            )
-            qq1 = (
-                image_obj["total_boxes"][:, 0]
-                + image_obj["total_boxes"][:, 5] * regw
-            )
-            qq2 = (
-                image_obj["total_boxes"][:, 1]
-                + image_obj["total_boxes"][:, 6] * regh
-            )
-            qq3 = (
-                image_obj["total_boxes"][:, 2]
-                + image_obj["total_boxes"][:, 7] * regw
-            )
-            qq4 = (
-                image_obj["total_boxes"][:, 3]
-                + image_obj["total_boxes"][:, 8] * regh
-            )
+            regw = image_obj["total_boxes"][:, 2] - image_obj["total_boxes"][:, 0]
+            regh = image_obj["total_boxes"][:, 3] - image_obj["total_boxes"][:, 1]
+            qq1 = image_obj["total_boxes"][:, 0] + image_obj["total_boxes"][:, 5] * regw
+            qq2 = image_obj["total_boxes"][:, 1] + image_obj["total_boxes"][:, 6] * regh
+            qq3 = image_obj["total_boxes"][:, 2] + image_obj["total_boxes"][:, 7] * regw
+            qq4 = image_obj["total_boxes"][:, 3] + image_obj["total_boxes"][:, 8] * regh
             image_obj["total_boxes"] = np.transpose(
                 np.vstack([qq1, qq2, qq3, qq4, image_obj["total_boxes"][:, 4]])
             )
@@ -654,9 +605,9 @@ def bulk_detect_face(
             if numbox > 0:
                 for k in range(0, numbox):
                     tmp = np.zeros((int(tmph[k]), int(tmpw[k]), 3))
-                    tmp[dy[k] - 1 : edy[k], dx[k] - 1 : edx[k], :] = images[
-                        index
-                    ][y[k] - 1 : ey[k], x[k] - 1 : ex[k], :]
+                    tmp[dy[k] - 1 : edy[k], dx[k] - 1 : edx[k], :] = images[index][
+                        y[k] - 1 : ey[k], x[k] - 1 : ex[k], :
+                    ]
                     if (
                         tmp.shape[0] > 0
                         and tmp.shape[1] > 0
@@ -719,18 +670,18 @@ def bulk_detect_face(
 
             if numbox > 0:
                 tempimg = np.zeros((48, 48, 3, numbox))
-                image_obj["total_boxes"] = np.fix(
-                    image_obj["total_boxes"]
-                ).astype(np.int32)
+                image_obj["total_boxes"] = np.fix(image_obj["total_boxes"]).astype(
+                    np.int32
+                )
                 dy, edy, dx, edx, y, ey, x, ex, tmpw, tmph = pad(
                     image_obj["total_boxes"].copy(), w, h
                 )
 
                 for k in range(0, numbox):
                     tmp = np.zeros((int(tmph[k]), int(tmpw[k]), 3))
-                    tmp[dy[k] - 1 : edy[k], dx[k] - 1 : edx[k], :] = images[
-                        index
-                    ][y[k] - 1 : ey[k], x[k] - 1 : ex[k], :]
+                    tmp[dy[k] - 1 : edy[k], dx[k] - 1 : edx[k], :] = images[index][
+                        y[k] - 1 : ey[k], x[k] - 1 : ex[k], :
+                    ]
                     if (
                         tmp.shape[0] > 0
                         and tmp.shape[1] > 0
@@ -851,9 +802,7 @@ def generateBoundingBox(imap, reg, scale, t):
         dx2 = np.flipud(dx2)
         dy2 = np.flipud(dy2)
     score = imap[(y, x)]
-    reg = np.transpose(
-        np.vstack([dx1[(y, x)], dy1[(y, x)], dx2[(y, x)], dy2[(y, x)]])
-    )
+    reg = np.transpose(np.vstack([dx1[(y, x)], dy1[(y, x)], dx2[(y, x)], dy2[(y, x)]]))
     if reg.size == 0:
         reg = np.empty((0, 3))
     bb = np.transpose(np.vstack([y, x]))

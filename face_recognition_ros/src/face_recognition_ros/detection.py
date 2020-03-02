@@ -1,10 +1,9 @@
+import typing
+
 import numpy as np
 
 from face_recognition_ros import datum
-from face_recognition_ros.detectors import (
-    mtcnn_mxnet_detector,
-    opencv_face_detector,
-)
+from face_recognition_ros.detectors import mtcnn_mxnet_detector, opencv_face_detector
 from face_recognition_ros.utils import config
 
 # mtcnn_face_detector,
@@ -37,5 +36,5 @@ class FaceDetector:
 
     def predict(
         self, X: np.ndarray, threshold=0.95, extract_image=False, **kwargs
-    ) -> datum.Datum:
+    ) -> typing.List[datum.Datum]:
         return self.detector.predict(X, threshold, extract_image, **kwargs)

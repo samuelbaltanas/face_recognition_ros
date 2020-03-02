@@ -15,9 +15,7 @@ from tvm import relay
 
 # from tvm.contrib import graph_runtime
 
-prefix = os.path.join(
-    files.PROJECT_ROOT, "data", "models", "model-r100-ii", "model"
-)
+prefix = os.path.join(files.PROJECT_ROOT, "data", "models", "model-r100-ii", "model")
 # prefix = os.path.join(files.PROJECT_ROOT, "data", "models", "model-y1-test2", "model")
 epoch = 0
 image_size = [112, 112]
@@ -36,9 +34,7 @@ class FaceEncoder:
         sym = all_layers["fc1_output"]
         self.model = mx.mod.Module(symbol=sym, context=ctx, label_names=None)
 
-        self.model.bind(
-            data_shapes=[("data", (1, 3, image_size[0], image_size[1]))]
-        )
+        self.model.bind(data_shapes=[("data", (1, 3, image_size[0], image_size[1]))])
         self.model.set_params(arg_params, aux_params)
 
     def predict(self, face_images, batch_size=1):

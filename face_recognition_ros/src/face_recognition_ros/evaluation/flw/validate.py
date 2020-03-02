@@ -31,9 +31,7 @@ def main(
         embedding_list = []
         y_true = []
 
-        for (path0, path1), issame in lfw_utils.get_paths(
-            flw_dir, pairs_filename
-        ):
+        for (path0, path1), issame in lfw_utils.get_paths(flw_dir, pairs_filename):
 
             im0 = cv2.imread(path0)
             im1 = cv2.imread(path1)
@@ -50,9 +48,7 @@ def main(
             with open(store_file, "wb") as f:
                 pickle.dump((embedding_list, y_true), f)
 
-    tpr, fpr, accuracy, val, val_std, far = lfw_utils.evaluate(
-        embedding_list, y_true
-    )
+    tpr, fpr, accuracy, val, val_std, far = lfw_utils.evaluate(embedding_list, y_true)
 
     print("Accuracy: %2.5f+-%2.5f" % (np.mean(accuracy), np.std(accuracy)))
     print("Validation rate: %2.5f+-%2.5f @ FAR=%2.5f" % (val, val_std, far))

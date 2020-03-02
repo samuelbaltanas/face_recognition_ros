@@ -35,9 +35,7 @@ def create_faces_dataset(in_dir, out_dir=None, out_file="database.pkl"):
                 faces = det.extract_images(image)
                 embedding = enc.predict(faces)
                 if embedding.shape[0] > 1:
-                    logging.warn(
-                        "Multiple faces in image image {}".format(file_name)
-                    )
+                    logging.warn("Multiple faces in image image {}".format(file_name))
                     continue
 
             except Exception as e:

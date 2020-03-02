@@ -24,10 +24,7 @@ log = logging.getLogger("face_recognition_ros")
 
 
 def main(
-    detection_method="mtcnn",
-    fold_dir=fold_dir,
-    image_dir=image_dir,
-    out_file=out_dir,
+    detection_method="mtcnn", fold_dir=fold_dir, image_dir=image_dir, out_file=out_dir,
 ):
     log.setLevel(logging.DEBUG)
     if not path.exists(out_dir):

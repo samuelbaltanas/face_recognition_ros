@@ -36,11 +36,7 @@ from face_recognition_ros.utils.math import dist as distance
 
 
 def evaluate(
-    embeddings,
-    actual_issame,
-    nrof_folds=10,
-    distance_metric=0,
-    subtract_mean=False,
+    embeddings, actual_issame, nrof_folds=10, distance_metric=0, subtract_mean=False,
 ):
     # Calculate evaluation metrics
     thresholds = np.arange(0, 4, 0.01)
@@ -137,9 +133,7 @@ def calculate_roc(
     for fold_idx, (train_set, test_set) in enumerate(k_fold.split(indices)):
         if subtract_mean:
             mean = np.mean(
-                np.concatenate(
-                    [embeddings1[train_set], embeddings2[train_set]]
-                ),
+                np.concatenate([embeddings1[train_set], embeddings2[train_set]]),
                 axis=0,
             )
         else:
@@ -158,13 +152,9 @@ def calculate_roc(
                 tprs[fold_idx, threshold_idx],
                 fprs[fold_idx, threshold_idx],
                 _,
-            ) = calculate_accuracy(
-                threshold, dist[test_set], actual_issame[test_set]
-            )
+            ) = calculate_accuracy(threshold, dist[test_set], actual_issame[test_set])
         _, _, accuracy[fold_idx] = calculate_accuracy(
-            thresholds[best_threshold_index],
-            dist[test_set],
-            actual_issame[test_set],
+            thresholds[best_threshold_index], dist[test_set], actual_issame[test_set],
         )
 
         tpr = np.mean(tprs, 0)
@@ -177,9 +167,7 @@ def calculate_accuracy(threshold, dist, actual_issame):
     tp = np.sum(np.logical_and(predict_issame, actual_issame))
     fp = np.sum(np.logical_and(predict_issame, np.logical_not(actual_issame)))
     tn = np.sum(
-        np.logical_and(
-            np.logical_not(predict_issame), np.logical_not(actual_issame)
-        )
+        np.logical_and(np.logical_not(predict_issame), np.logical_not(actual_issame))
     )
     fn = np.sum(np.logical_and(np.logical_not(predict_issame), actual_issame))
 
@@ -213,9 +201,7 @@ def calculate_val(
     for fold_idx, (train_set, test_set) in enumerate(k_fold.split(indices)):
         if subtract_mean:
             mean = np.mean(
-                np.concatenate(
-                    [embeddings1[train_set], embeddings2[train_set]]
-                ),
+                np.concatenate([embeddings1[train_set], embeddings2[train_set]]),
                 axis=0,
             )
         else:
@@ -247,9 +233,7 @@ def calculate_val(
 def calculate_val_far(threshold, dist, actual_issame):
     predict_issame = np.less(dist, threshold)
     true_accept = np.sum(np.logical_and(predict_issame, actual_issame))
-    false_accept = np.sum(
-        np.logical_and(predict_issame, np.logical_not(actual_issame))
-    )
+    false_accept = np.sum(np.logical_and(predict_issame, np.logical_not(actual_issame)))
     n_same = np.sum(actual_issame)
     n_diff = np.sum(np.logical_not(actual_issame))
     val = float(true_accept) / float(n_same)

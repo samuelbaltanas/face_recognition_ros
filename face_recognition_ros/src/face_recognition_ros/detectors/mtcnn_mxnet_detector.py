@@ -1,4 +1,6 @@
 # coding: utf-8
+import typing
+
 import numpy as np
 
 from face_recognition_ros import datum, region
@@ -16,7 +18,7 @@ class MtcnnMxnetDetector:
 
     def predict(
         self, X: np.ndarray, threshold=0.95, extract_image=False, align=True
-    ) -> datum.Datum:
+    ) -> typing.List[datum.Datum]:
         ret = self.detector.detect_face(X)
 
         if ret is None:
@@ -40,58 +42,9 @@ class MtcnnMxnetDetector:
                     elif extract_image:
                         point = None
 
-                    aligned = align_mtcnn.align(
-                        X, bb, point, image_size="112,112"
-                    )
+                    aligned = align_mtcnn.align(X, bb, point, image_size="112,112")
                     dat.image = aligned
 
                 data.append(dat)
 
         return data
-
-
-"""
-    def extract_region(self, image: np.ndarray, threshold=0.95) -> datum.Datum:
-        ret = self.detector.detect_face(image)
-
-        if ret is None:
-            return [], None
-
-        bbox, points = ret
-        if bbox.shape[0] == 0:
-            return [], None
-
-        data = [
-            datum.Datum(
-                region=region.RectangleRegion(
-                    bb[0], bb[1], bb[2] - bb[0], bb[3] - bb[1], bb[4]
-                ),
-                keypoints=points[idx, :],
-            )
-            for idx, bb in enumerate(bbox)
-            if bb[4] >= threshold
-        ]
-
-        return data
-
-    def extract_images(self, image, data=None, align=True):
-        if data is None:
-            data = self.extract_region(image, 0)
-
-        if not align:
-            return super(MtcnnMxnetDetector, self).extract_images(image, data)
-        else:
-            res = []
-
-            for dat in data:
-                point = dat.keypoints.reshape((2, 5)).T
-                aligned = align_mtcnn.align(
-                    image,
-                    dat.region.to_cvbox(score=True),
-                    point,
-                    image_size="112,112",
-                )
-                res.append(aligned)
-
-            return res
-"""

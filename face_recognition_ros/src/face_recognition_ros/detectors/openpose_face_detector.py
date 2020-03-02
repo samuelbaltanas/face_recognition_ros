@@ -38,13 +38,10 @@ class FacialDetector(base_face_detector.BaseFaceDetector):
             sys.exit(-1)
         else:
             regions = [
-                openpose_face_detector2(pose, threshold)
-                for pose in datum.poseKeypoints
+                openpose_face_detector2(pose, threshold) for pose in datum.poseKeypoints
             ]
 
-            regions = [
-                reg for reg in regions if not np.any(reg.dimensions == 0)
-            ]
+            regions = [reg for reg in regions if not np.any(reg.dimensions == 0)]
 
         return regions, datum
 
@@ -209,9 +206,7 @@ def openpose_face_detector2(posePtr, threshold):
 
     if l_true is not None:
         ll = l_true[0]
-        face_size[0] = face_size[0] - (
-            ll - (point_top_left[0] - face_size[0] / 2)
-        )
+        face_size[0] = face_size[0] - (ll - (point_top_left[0] - face_size[0] / 2))
     else:
         ll = point_top_left[0] - face_size[0] / 2
     #
@@ -220,9 +215,5 @@ def openpose_face_detector2(posePtr, threshold):
         face_size[0] = rr - ll
 
     return region.RectangleRegion(
-        ll,
-        point_top_left[1] - face_size[1] / 2,
-        face_size[0],
-        face_size[1],
-        score,
+        ll, point_top_left[1] - face_size[1] / 2, face_size[0], face_size[1], score,
     )

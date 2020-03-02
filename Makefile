@@ -19,7 +19,7 @@ clean-pyc: ## remove Python file artifacts
 
 format:
 	isort -rc .
-	black -l 80 .
+	black .
 
 lint: format ## check style with flake8
 	python3 -m pyflakes .

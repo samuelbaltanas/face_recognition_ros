@@ -16,17 +16,13 @@ class FaceEncoder:
 
         # Loading model
         with self.session.as_default():
-            facenet.load_model(
-                files.get_model_path("", conf["FACENET"]["model_name"])
-            )
+            facenet.load_model(files.get_model_path("", conf["FACENET"]["model_name"]))
 
         # Tensors
         def_graph = tf.get_default_graph()
         self._images_placeholder = def_graph.get_tensor_by_name("input:0")
         self._embeddings = def_graph.get_tensor_by_name("embeddings:0")
-        self._phase_train_placeholder = def_graph.get_tensor_by_name(
-            "phase_train:0"
-        )
+        self._phase_train_placeholder = def_graph.get_tensor_by_name("phase_train:0")
 
     def predict(self, face_images):
         images = [preprocess_face(face) for face in face_images]

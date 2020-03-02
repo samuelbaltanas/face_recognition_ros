@@ -47,18 +47,13 @@ class BoundingBox:
         return tuple(cvbox)
 
     def intersect(self, x):
-        ov = (
-            max(self.box[:, 0], x.box[:, 0]) - min(self.box[:, 2], x.box[:, 2])
-        ) * (
-            max(self.box[:, 1], x.box[:, 1])
-            - min(self.box[:, 3], self.box[:, 3])
+        ov = (max(self.box[:, 0], x.box[:, 0]) - min(self.box[:, 2], x.box[:, 2])) * (
+            max(self.box[:, 1], x.box[:, 1]) - min(self.box[:, 3], self.box[:, 3])
         )
 
         return ov / (self.size() + x.size() - ov)
 
-    def draw(
-        self, image, label=None, color=(0, 255, 0), thickness=3, font_scale=1
-    ):
+    def draw(self, image, label=None, color=(0, 255, 0), thickness=3, font_scale=1):
         b = self.box[0]
         bb = [b[:2], [b[0], b[3]], b[2:], [b[2], b[1]]]
 
@@ -66,11 +61,7 @@ class BoundingBox:
             color = (255, 0, 0)
 
         image = cv2.polylines(
-            image,
-            np.int64([bb]),
-            isClosed=True,
-            color=color,
-            thickness=thickness,
+            image, np.int64([bb]), isClosed=True, color=color, thickness=thickness,
         )
         if label:
             image = cv2.putText(

@@ -30,10 +30,8 @@ class OpencvFaceDetector(base_face_detector.BaseFaceDetector):
                 reg = region.BoundingBox(
                     detections[i, 3] * DIMS[1] - self.margin / 2,
                     detections[i, 4] * DIMS[0] - self.margin / 2,
-                    (detections[i, 5] - detections[i, 3]) * DIMS[1]
-                    + self.margin,
-                    (detections[i, 6] - detections[i, 4]) * DIMS[0]
-                    + self.margin,
+                    (detections[i, 5] - detections[i, 3]) * DIMS[1] + self.margin,
+                    (detections[i, 6] - detections[i, 4]) * DIMS[0] + self.margin,
                     detections[i, 2],
                 )
                 logging.debug("Face {} detected: {}".format(i, str(reg)))

@@ -104,9 +104,7 @@ def align(img, bbox=None, landmark=None, **kwargs):
         # print(src)
         # print(dst)
         # print(M)
-        warped = cv2.warpAffine(
-            img, M, (image_size[1], image_size[0]), borderValue=0.0
-        )
+        warped = cv2.warpAffine(img, M, (image_size[1], image_size[0]), borderValue=0.0)
 
         # tform3 = trans.ProjectiveTransform()
         # tform3.estimate(src, dst)
